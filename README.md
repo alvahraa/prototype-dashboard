@@ -5,9 +5,11 @@
 ![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Recharts](https://img.shields.io/badge/Recharts-2.x-FF6384?style=for-the-badge&logo=chart.js&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Project](https://img.shields.io/badge/Proyek-Magang-orange?style=for-the-badge)
 
 **Dashboard analytics modern untuk monitoring perpustakaan dengan visualisasi data lengkap dan sistem rekomendasi.**
+
+*Proyek Magang - Perpustakaan Unnisula*
 
 [Demo](#demo) • [Fitur](#-fitur-utama) • [Instalasi](#-instalasi) • [Struktur](#-struktur-project) • [Kontribusi](#-kontribusi)
 
@@ -260,15 +262,9 @@ npm install
 
 ---
 
-## 📄 License
+## 👥 Author
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-## 👥 Authors
-
-- **Perpustakaan Unnisula** - *Initial work*
+- **Alvah Rabbany** - *Proyek Magang Perpustakaan Unnisula*
 
 ---
 

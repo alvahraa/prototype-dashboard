@@ -1,9 +1,8 @@
 {
   "name": "perpustakaan-dashboard",
   "version": "1.0.0",
-  "description": "Dashboard Analytics untuk monitoring perpustakaan Unnisula dengan visualisasi data dan sistem rekomendasi",
-  "author": "Perpustakaan Unnisula",
-  "license": "MIT",
+  "description": "Dashboard Analytics untuk monitoring perpustakaan Unnisula dengan visualisasi data dan sistem rekomendasi - Proyek Magang",
+  "author": "Alvah Rabbany",
   "private": true,
   "homepage": "https://github.com/alvahraa/perpustakaan-dashboard#readme",
   "repository": {

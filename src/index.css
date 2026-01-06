@@ -1,0 +1,150 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Card Base Styles */
+@layer components {
+  .card {
+    @apply bg-white border border-border rounded-lg p-6 shadow-sm;
+  }
+
+  .card-header {
+    @apply text-lg font-semibold text-black mb-4;
+  }
+
+  .btn {
+    @apply bg-black text-white px-4 py-2 rounded-md transition-all duration-200 hover:bg-gray-800 font-medium;
+  }
+
+  .btn-outline {
+    @apply border border-black text-black px-4 py-2 rounded-md transition-all duration-200 hover:bg-black hover:text-white font-medium;
+  }
+
+  .chip {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .chip-success {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .chip-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .chip-error {
+    @apply bg-red-100 text-red-800;
+  }
+
+  .chip-neutral {
+    @apply bg-gray-100 text-gray-800;
+  }
+}
+
+/* Animation Keyframes */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-count-up {
+  animation: countUp 0.5s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Table Styles */
+.table-container {
+  @apply overflow-x-auto;
+}
+
+.table {
+  @apply w-full text-sm;
+}
+
+.table thead {
+  @apply bg-gray-50 border-b border-border;
+}
+
+.table th {
+  @apply px-4 py-3 text-left font-semibold text-gray-700;
+}
+
+.table td {
+  @apply px-4 py-3 border-b border-border;
+}
+
+.table tbody tr:hover {
+  @apply bg-gray-50;
+}
+
+.table tbody tr:nth-child(even) {
+  @apply bg-gray-50/50;
+}

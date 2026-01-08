@@ -37,8 +37,8 @@ function Sidebar({ activePage, onNavigate, user, onLogout }) {
             <Library className="w-6 h-6 text-black" />
           </div>
           <div>
-            <h1 className="font-bold text-lg leading-tight">Perpustakaan</h1>
-            <p className="text-xs text-gray-400">Unnisula Analytics</p>
+            <h1 className="font-bold text-lg leading-tight">Prototype</h1>
+            <p className="text-xs text-gray-400">Dashboard Analytics</p>
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@ function Sidebar({ activePage, onNavigate, user, onLogout }) {
         )}
         
         <p className="text-xs text-gray-600 text-center mt-3">
-          © 2024 Unnisula Library
+          © 2024 Prototype Dashboard
         </p>
       </div>
     </aside>

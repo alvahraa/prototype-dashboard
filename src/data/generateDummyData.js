@@ -1,5 +1,5 @@
 /**
- * Dummy Data Generator untuk Dashboard Perpustakaan Unnisula
+ * Dummy Data Generator untuk Prototype Dashboard
  * 
  * Data ini mencakup:
  * - 1000 visitor entries (30 hari terakhir)

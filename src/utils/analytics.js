@@ -1,5 +1,5 @@
 /**
- * Analytics Utility Functions untuk Dashboard Perpustakaan Unnisula
+ * Analytics Utility Functions untuk Prototype Dashboard
  * 
  * File ini berisi semua fungsi analisis data:
  * - Visitor Analytics (peak hours, duration, distribution, trends)

@@ -7,7 +7,7 @@ import { DataModeIndicator } from './components/Common';
 /**
  * Main App Component
  * 
- * Dashboard Analytics Perpustakaan Unnisula
+ * Prototype Dashboard Analytics
  * - Login: Halaman login dengan animasi wallpaper
  * - Layout: Sidebar + Header + Content
  * - Navigation: Dashboard, Visitors, Loans, Recommendations
@@ -22,7 +22,7 @@ const PAGE_TITLES = {
 };
 
 // Storage key for auth
-const AUTH_KEY = 'perpustakaan_auth';
+const AUTH_KEY = 'prototype_auth';
 
 function App() {
   const [activePage, setActivePage] = useState('dashboard');

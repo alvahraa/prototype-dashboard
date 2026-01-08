@@ -147,7 +147,7 @@ function LoginPage({ onLogin }) {
               <BookOpen className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-gray-800 mb-1">
-              Perpustakaan Unnisula
+              Prototype Dashboard
             </h1>
             <p className="text-gray-500 text-sm">
               Dashboard Analytics System
@@ -236,7 +236,7 @@ function LoginPage({ onLogin }) {
           {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-400">
-              © 2024 Perpustakaan Unnisula • Dashboard v1.0
+              © 2024 Prototype Dashboard • v1.0
             </p>
           </div>
         </div>

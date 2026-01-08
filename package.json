@@ -1,16 +1,16 @@
 {
-  "name": "perpustakaan-dashboard",
+  "name": "prototype-dashboard",
   "version": "1.0.0",
-  "description": "Dashboard Analytics untuk monitoring perpustakaan Unnisula dengan visualisasi data dan sistem rekomendasi - Proyek Magang",
+  "description": "Dashboard Analytics Prototype untuk monitoring perpustakaan dengan visualisasi data dan sistem rekomendasi - Proyek Magang",
   "author": "Alvah Rabbany",
   "private": true,
-  "homepage": "https://github.com/alvahraa/perpustakaan-dashboard#readme",
+  "homepage": "/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alvahraa/perpustakaan-dashboard.git"
+    "url": "https://github.com/alvahraa/prototype-dashboard.git"
   },
   "bugs": {
-    "url": "https://github.com/alvahraa/perpustakaan-dashboard/issues"
+    "url": "https://github.com/alvahraa/prototype-dashboard/issues"
   },
   "keywords": [
     "dashboard",

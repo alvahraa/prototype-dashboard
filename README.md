@@ -6,7 +6,7 @@
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Recharts](https://img.shields.io/badge/Recharts-2.x-FF6384?style=for-the-badge&logo=chart.js&logoColor=white)
 
-**Sistem dashboard analytics modern untuk monitoring perpustakaan dengan visualisasi data dan sistem rekomendasi buku berbasis AI.**
+**Sistem dashboard analytics modern untuk monitoring perpustakaan dengan visualisasi data dan sistem rekomendasi buku berbasis algoritma.**
 
 [Fitur](#fitur-utama) • [Mekanisme](#mekanisme-dan-algoritma) • [Instalasi](#instalasi) • [Struktur](#struktur-project)
 
@@ -48,10 +48,10 @@
 - **Loan Trend**: Area chart trend peminjaman 6 bulan
 - **Late Returns**: Progress bar statistik keterlambatan
 
-### 4. Sistem Rekomendasi AI
-- **Trending Books**: Top 10 buku trending minggu ini
-- **Collaborative Filtering**: "Yang pinjam ini juga pinjam..."
-- **Content-Based Filtering**: Rekomendasi berdasarkan kategori favorit
+### 4. Sistem Rekomendasi (Algoritma)
+- **Trending Books**: Top 10 buku trending minggu ini (frequency counting)
+- **Collaborative Filtering**: "Yang pinjam ini juga pinjam..." (co-occurrence analysis)
+- **Content-Based Filtering**: Rekomendasi berdasarkan kategori favorit (category matching)
 
 ---
 

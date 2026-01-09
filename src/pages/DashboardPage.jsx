@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { KPICards, TrendChart, CategoryChart } from '../components/Dashboard';
+import { KPICards, TrendChart, CategoryChart, SmartInsights } from '../components/Dashboard';
 import { LoadingPage, ErrorMessage, RefreshButton, DateRangePicker, LastUpdated } from '../components/Common';
 import { useDashboardData } from '../hooks';
 import * as analytics from '../utils/analytics';
@@ -136,6 +136,15 @@ function DashboardPage() {
           <KPICards summary={summary} />
         </motion.div>
       )}
+      {/* Smart Insights Panel */}
+      <motion.div variants={itemVariants}>
+        <SmartInsights 
+          lateLoans={summary?.lateLoans || 0}
+          visitorCount={visitors?.length || 0}
+          avgVisitors={summary?.avgDailyVisitors || 0}
+          topBooks={topBooks}
+        />
+      </motion.div>
 
       {/* Charts - Bento Grid 2 columns */}
       <motion.div 

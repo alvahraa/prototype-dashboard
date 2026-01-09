@@ -7,10 +7,100 @@ import {
   ErrorMessage, 
   RefreshButton, 
   LastUpdated,
-  Tabs 
+  Tabs,
+  ViewToggle 
 } from '../components/Common';
 import { useVisitors, useLoans, useBooks } from '../hooks';
 import * as analytics from '../utils/analytics';
+
+// TrendingSection with View Toggle
+function TrendingSection({ trendingBooks }) {
+  const [viewMode, setViewMode] = useState('grid');
+  
+  return (
+    <div className="space-y-6">
+      <div className="card bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+        {/* Header with Toggle */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Flame className="w-6 h-6 text-orange-400" />
+            <h3 className="text-xl font-bold">Trending Minggu Ini</h3>
+          </div>
+          <ViewToggle viewMode={viewMode} onViewChange={setViewMode} />
+        </div>
+        <p className="text-gray-300 mb-6">
+          Buku-buku yang paling banyak dipinjam dalam 7 hari terakhir.
+        </p>
+        
+        {/* Grid View */}
+        {viewMode === 'grid' && (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {trendingBooks.slice(0, 10).map((book, index) => (
+              <motion.div 
+                key={book.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                whileHover={{ y: -4 }}
+                className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center cursor-pointer hover:bg-white/15 transition-colors"
+              >
+                <div className="relative mb-3">
+                  {index < 3 && (
+                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                      {index + 1}
+                    </span>
+                  )}
+                  <div 
+                    className="w-full aspect-[3/4] rounded-lg flex items-center justify-center text-2xl font-bold"
+                    style={{ backgroundColor: `hsl(${index * 25}, 20%, ${25 + index * 5}%)` }}
+                  >
+                    {book.title?.charAt(0) || 'B'}
+                  </div>
+                </div>
+                <p className="text-sm font-medium text-white line-clamp-2">{book.title}</p>
+                <p className="text-xs text-gray-400 mt-1">{book.loanCount || book.totalLoans} pinjam</p>
+              </motion.div>
+            ))}
+          </div>
+        )}
+        
+        {/* Table View (Admin) */}
+        {viewMode === 'table' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-400 border-b border-white/10">
+                  <th className="px-3 py-2">#</th>
+                  <th className="px-3 py-2">ID</th>
+                  <th className="px-3 py-2">Judul</th>
+                  <th className="px-3 py-2">Penulis</th>
+                  <th className="px-3 py-2">Kategori</th>
+                  <th className="px-3 py-2 text-right">Pinjam</th>
+                </tr>
+              </thead>
+              <tbody>
+                {trendingBooks.slice(0, 10).map((book, index) => (
+                  <tr key={book.id} className="border-b border-white/5 hover:bg-white/5">
+                    <td className="px-3 py-2 font-bold text-orange-400">{index + 1}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-gray-400">{book.id}</td>
+                    <td className="px-3 py-2 font-medium text-white">{book.title}</td>
+                    <td className="px-3 py-2 text-gray-300">{book.author}</td>
+                    <td className="px-3 py-2">
+                      <span className="px-2 py-0.5 bg-white/10 text-gray-300 text-xs rounded">
+                        {book.category || 'Umum'}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-right font-semibold text-white">{book.loanCount || book.totalLoans}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 /**
  * RecommendationsPage - Tab-Based Architecture
@@ -166,52 +256,7 @@ function RecommendationsPage() {
         >
           {/* Trending Tab */}
           {activeTab === 'trending' && (
-            <div className="space-y-6">
-              {/* Hero Card */}
-              <div className="card bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-                <div className="flex items-center gap-3 mb-4">
-                  <Flame className="w-6 h-6 text-orange-400" />
-                  <h3 className="text-xl font-bold">Trending Minggu Ini</h3>
-                </div>
-                <p className="text-gray-300 mb-6">
-                  Buku-buku yang paling banyak dipinjam dalam 7 hari terakhir. 
-                  Algoritma: <span className="text-white font-medium">Frequency Counting</span>
-                </p>
-                
-                {/* Trending Grid */}
-                <motion.div 
-                  className="grid grid-cols-2 md:grid-cols-5 gap-4"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  {trendingBooks.slice(0, 10).map((book, index) => (
-                    <motion.div 
-                      key={book.id}
-                      variants={itemVariants}
-                      whileHover={{ y: -4, scale: 1.02 }}
-                      className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center cursor-pointer hover:bg-white/15 transition-colors"
-                    >
-                      <div className="relative mb-3">
-                        {index < 3 && (
-                          <span className="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                            {index + 1}
-                          </span>
-                        )}
-                        <div 
-                          className="w-full aspect-[3/4] rounded-lg flex items-center justify-center text-2xl font-bold"
-                          style={{ backgroundColor: `hsl(${index * 25}, 20%, ${25 + index * 5}%)` }}
-                        >
-                          {book.title?.charAt(0) || 'B'}
-                        </div>
-                      </div>
-                      <p className="text-sm font-medium text-white line-clamp-2">{book.title}</p>
-                      <p className="text-xs text-gray-400 mt-1">{book.loanCount || book.totalLoans} pinjam</p>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-            </div>
+            <TrendingSection trendingBooks={trendingBooks} />
           )}
 
           {/* For You Tab */}

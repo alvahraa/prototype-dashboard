@@ -14,6 +14,13 @@
 
 ---
 
+> ⚠️ **CATATAN PENTING:**  
+> Sistem ini masih berupa **PROTOTYPE** dan menggunakan **data dummy** untuk demonstrasi.  
+> Belum diuji coba dengan database real (Gate System / SLiMS).  
+> Diperlukan integrasi dan pengujian lebih lanjut sebelum digunakan di lingkungan produksi.
+
+---
+
 ## Demo Screenshots
 
 > **Catatan:** Tambahkan screenshot demo di folder `public/images/demo/`

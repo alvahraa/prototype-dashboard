@@ -60,6 +60,37 @@
 - **Collaborative Filtering**: "Yang pinjam ini juga pinjam..." (co-occurrence analysis)
 - **Content-Based Filtering**: Rekomendasi berdasarkan kategori favorit (category matching)
 
+### 5. Motion Design System
+
+Dashboard menggunakan **Framer Motion** untuk animasi profesional dan smooth:
+
+#### Sidebar Navigation
+- **Staggered Entry**: Menu items muncul satu per satu dengan efek slide-in
+- **layoutId Transition**: Active menu pill bergerak smooth antar menu item
+- **Micro-interactions**: Hover lift dan tap feedback pada semua tombol
+
+#### Chart Animations (Recharts)
+- **Line Chart**: Animasi "pencil sketch" - garis digambar dari kiri ke kanan (2 detik)
+- **Bar Chart**: Animasi grow - bar tumbuh dari bawah ke atas (1.5 detik)
+- **Glassmorphism Tooltips**: Tooltip dengan efek backdrop-blur dan transparansi
+
+#### Login Page
+- **Mesh Gradient Background**: Animated organic blob shapes
+- **Glassmorphism Card**: Backdrop blur dengan semi-transparent background
+- **Input Micro-interactions**: Scale up dan glow effect saat focus
+
+#### UI Components
+- **MotionCard**: Card dengan hover lift effect
+- **MotionButton**: Button dengan tactile press feedback (whileTap scale)
+- **MotionContainer**: Staggered children animation
+
+**Packages:**
+```
+framer-motion  - Animation library
+clsx           - Conditional class names
+tailwind-merge - Merge Tailwind classes
+```
+
 ---
 
 ## Mekanisme dan Algoritma

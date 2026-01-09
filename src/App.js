@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './index.css';
 import { Sidebar, Header } from './components/Layout';
 import { DashboardPage, VisitorsPage, LoansPage, RecommendationsPage, LoginPage } from './pages';
@@ -11,6 +12,7 @@ import { DataModeIndicator } from './components/Common';
  * - Login: Halaman login dengan animasi wallpaper
  * - Layout: Sidebar + Header + Content
  * - Navigation: Dashboard, Visitors, Loans, Recommendations
+ * - Page transitions with AnimatePresence
  */
 
 // Page title mapping
@@ -23,6 +25,25 @@ const PAGE_TITLES = {
 
 // Storage key for auth
 const AUTH_KEY = 'prototype_auth';
+
+// Page transition variants
+const pageVariants = {
+  initial: { opacity: 0, y: 8 },
+  enter: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      type: 'spring',
+      stiffness: 200,
+      damping: 25,
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    y: -8,
+    transition: { duration: 0.15 }
+  }
+};
 
 function App() {
   const [activePage, setActivePage] = useState('dashboard');
@@ -56,27 +77,26 @@ function App() {
     setActivePage('dashboard');
   };
 
-  // Render active page
+  // Render active page with key for AnimatePresence
   const renderPage = () => {
-    switch (activePage) {
-      case 'dashboard':
-        return <DashboardPage />;
-      case 'visitors':
-        return <VisitorsPage />;
-      case 'loans':
-        return <LoansPage />;
-      case 'recommendations':
-        return <RecommendationsPage />;
-      default:
-        return <DashboardPage />;
-    }
+    const pages = {
+      dashboard: <DashboardPage />,
+      visitors: <VisitorsPage />,
+      loans: <LoansPage />,
+      recommendations: <RecommendationsPage />,
+    };
+    return pages[activePage] || <DashboardPage />;
   };
 
   // Show loading while checking auth
   if (isCheckingAuth) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50">
-        <div className="animate-spin w-8 h-8 border-4 border-black border-t-transparent rounded-full" />
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+          className="w-8 h-8 border-4 border-gray-900 border-t-transparent rounded-full" 
+        />
       </div>
     );
   }
@@ -88,7 +108,7 @@ function App() {
 
   // Show dashboard if authenticated
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Sidebar */}
       <Sidebar 
         activePage={activePage} 
@@ -98,7 +118,7 @@ function App() {
       />
       
       {/* Main Content */}
-      <div className="flex-1 flex flex-col ml-64">
+      <div className="flex-1 flex flex-col ml-64 overflow-hidden">
         {/* Header */}
         <Header 
           title={PAGE_TITLES[activePage]} 
@@ -106,9 +126,19 @@ function App() {
           user={user}
         />
         
-        {/* Page Content */}
+        {/* Page Content with Transitions */}
         <main className="flex-1 overflow-auto p-6">
-          {renderPage()}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activePage}
+              variants={pageVariants}
+              initial="initial"
+              animate="enter"
+              exit="exit"
+            >
+              {renderPage()}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 

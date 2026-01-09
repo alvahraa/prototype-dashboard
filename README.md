@@ -1,90 +1,334 @@
-# Dashboard Analytics Perpustakaan - Prototype
+# Prototype Dashboard - Library Analytics System
 
 <div align="center">
 
 ![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Recharts](https://img.shields.io/badge/Recharts-2.x-FF6384?style=for-the-badge&logo=chart.js&logoColor=white)
-![Project](https://img.shields.io/badge/Proyek-Magang-orange?style=for-the-badge)
 
-**Dashboard analytics modern untuk monitoring perpustakaan dengan visualisasi data lengkap dan sistem rekomendasi.**
+**Sistem dashboard analytics modern untuk monitoring perpustakaan dengan visualisasi data dan sistem rekomendasi buku berbasis AI.**
 
-*Proyek Magang - Prototype Dashboard Perpustakaan*
-
-[Demo](#demo) • [Fitur](#fitur-utama) • [Instalasi](#instalasi) • [Struktur](#struktur-project) • [Kontribusi](#kontribusi)
+[Fitur](#fitur-utama) • [Mekanisme](#mekanisme-dan-algoritma) • [Instalasi](#instalasi) • [Struktur](#struktur-project)
 
 </div>
 
 ---
 
-## Demo
+## Demo Screenshots
 
-<div align="center">
+> **Catatan:** Tambahkan screenshot demo di folder `public/images/demo/`
 
-### Dashboard Utama
-![Dashboard](./public/images/demo_dashboard.png)
-
-### Analisis Pengunjung
-![Visitors](./public/images/demo_visitors.png)
-
-### Analisis Peminjaman
-![Loans](./public/images/demo_loans.png)
-
-### Sistem Rekomendasi
-![Recommendations](./public/images/demo_recommendations.png)
-
-</div>
-
----
-
-## Overview
-
-Dashboard Analytics Perpustakaan Prototype adalah aplikasi web berbasis React yang menyediakan:
-- Visualisasi data kunjungan dan peminjaman perpustakaan
-- Sistem rekomendasi buku menggunakan algoritma Collaborative Filtering dan Content-Based Filtering
-- Interface modern dengan animasi smooth dan responsive design
-- Integrasi API untuk data real-time (mendukung mode dummy untuk development)
+| Halaman | Screenshot |
+|---------|-----------|
+| Login | ![Login](./public/images/demo/login_page.png) |
+| Dashboard | ![Dashboard](./public/images/demo/dashboard_main.png) |
+| Kunjungan | ![Kunjungan](./public/images/demo/visitors_page.png) |
+| Peminjaman | ![Peminjaman](./public/images/demo/loans_page.png) |
+| Rekomendasi | ![Rekomendasi](./public/images/demo/recommendations_page.png) |
 
 ---
 
 ## Fitur Utama
 
-### Authentication
-- Login page dengan animated gradient wallpaper
-- Floating particles effect
-- Session persistence dengan localStorage
+### 1. Dashboard Overview
+- **KPI Cards**: Menampilkan 4 metrik utama (total buku, pengunjung hari ini, peminjaman aktif, pengunjung di perpustakaan)
+- **Trend Chart**: Grafik line chart kunjungan harian
+- **Category Chart**: Bar chart peminjaman per kategori buku
+- **Top Books**: 5 buku terpopuler bulan ini
 
-### Dashboard Overview
-- **KPI Cards**: Total buku, pengunjung, peminjaman dengan animasi counting
-- **Trend Chart**: Line chart kunjungan dengan period selector
-- **Category Chart**: Bar chart kategori terpopuler
-- **Date Range Filter**: Filter data berdasarkan rentang waktu
-- **Auto Refresh**: Data update otomatis dengan configurable interval
+### 2. Analisis Kunjungan
+- **Peak Hours Heatmap**: Visualisasi jam sibuk perpustakaan
+- **Faculty Distribution**: Pie chart distribusi pengunjung per fakultas
+- **Visitor Table**: Tabel pengunjung dengan fitur search, sort, dan filter
+- **Live Duration**: Durasi kunjungan real-time untuk pengunjung aktif
 
-### Analisis Kunjungan
-- **Peak Hours Heatmap**: Jam sibuk dengan gradient colors
-- **Faculty Distribution**: Pie chart distribusi per fakultas
-- **Visitor Table**: Tabel dengan search, sort, dan live duration
-- **Statistics Cards**: Durasi rata-rata, jam tersibuk, total bulanan
+### 3. Analisis Peminjaman
+- **Top 10 Books**: Grid buku terpopuler dengan ranking badges
+- **Category Popularity**: Horizontal bar chart kategori
+- **Loan Trend**: Area chart trend peminjaman 6 bulan
+- **Late Returns**: Progress bar statistik keterlambatan
 
-### Analisis Peminjaman
-- **Top 10 Books Grid**: Buku terpopuler dengan ranking badges
-- **Category Bar Chart**: Kategori horizontal bar chart
-- **Loan Trend Chart**: Area chart trend 6 bulan
-- **Late Returns Stats**: Progress bar keterlambatan
-
-### Sistem Rekomendasi
-- **Trending Books**: Top 10 minggu ini dengan ranked list
+### 4. Sistem Rekomendasi AI
+- **Trending Books**: Top 10 buku trending minggu ini
 - **Collaborative Filtering**: "Yang pinjam ini juga pinjam..."
-- **Content-Based**: Rekomendasi berdasarkan kategori favorit
-- **Algorithm Explanation**: Penjelasan cara kerja algoritma
+- **Content-Based Filtering**: Rekomendasi berdasarkan kategori favorit
+
+---
+
+## Mekanisme dan Algoritma
+
+### 1. Visitor Trend Analysis
+
+**Lokasi:** `src/utils/analytics.js` - fungsi `getVisitorTrend()`
+
+**Mekanisme:**
+```
+Input: Array visitor data, jumlah hari (default: 30)
+Process:
+  1. Filter visitors berdasarkan rentang tanggal
+  2. Group by tanggal (menggunakan date-fns format 'yyyy-MM-dd')
+  3. Count jumlah visitor per hari
+  4. Sort berdasarkan tanggal ascending
+Output: Array [{date, count, dayName}]
+```
+
+**Filter yang digunakan:**
+- Date range filter (startDate - endDate)
+- Grouping menggunakan JavaScript `reduce()`
+
+---
+
+### 2. Peak Hours Analysis (Jam Sibuk)
+
+**Lokasi:** `src/utils/analytics.js` - fungsi `getPeakHours()`
+
+**Mekanisme:**
+```
+Input: Array visitor data
+Process:
+  1. Extract jam masuk (entryTime) dari setiap visitor
+  2. Group by jam (7, 8, 9, ..., 21)
+  3. Count jumlah visitor per jam
+  4. Calculate persentase relatif terhadap jam tersibuk
+Output: Array [{hour, count, percentage, label}]
+```
+
+**Logika:**
+- Jam operasional: 07:00 - 21:00 (14 jam)
+- Peak detection: Jam dengan count tertinggi
+- Persentase dihitung: `(count / maxCount) * 100`
+
+---
+
+### 3. Faculty Distribution
+
+**Lokasi:** `src/utils/analytics.js` - fungsi `getFacultyDistribution()`
+
+**Mekanisme:**
+```
+Input: Array visitor data
+Process:
+  1. Group visitors by fakultas
+  2. Count per fakultas
+  3. Calculate persentase dari total
+  4. Sort descending by count
+Output: Array [{faculty, count, percentage, color}]
+```
+
+**Color Mapping:**
+- 9 fakultas dengan warna berbeda untuk Pie Chart
+- Menggunakan predefined color palette
+
+---
+
+### 4. Category Popularity
+
+**Lokasi:** `src/utils/analytics.js` - fungsi `getCategoryPopularity()`
+
+**Mekanisme:**
+```
+Input: Array loans, Array books
+Process:
+  1. Join loans dengan books berdasarkan bookId
+  2. Group by kategori buku
+  3. Count peminjaman per kategori
+  4. Sort descending by count
+Output: Array [{category, count, percentage}]
+```
+
+---
+
+### 5. Top Books Algorithm
+
+**Lokasi:** `src/utils/analytics.js` - fungsi `getTopBooks()`
+
+**Mekanisme:**
+```
+Input: Array loans, Array books, limit (default: 10)
+Process:
+  1. Count peminjaman per bookId menggunakan reduce()
+  2. Join dengan data buku untuk mendapat detail (title, author, category)
+  3. Sort descending by totalLoans
+  4. Slice untuk mendapat top N buku
+Output: Array [{id, title, author, category, totalLoans}]
+```
+
+---
+
+### 6. Sistem Rekomendasi
+
+#### A. Trending Books
+
+**Lokasi:** `src/utils/analytics.js` - fungsi `getTrendingBooks()`
+
+**Mekanisme:**
+```
+Input: Array loans, Array books, period (7 hari)
+Process:
+  1. Filter loans dalam period terakhir
+  2. Count peminjaman per buku
+  3. Calculate trend score: count dalam period / count total
+  4. Sort by trend score descending
+Output: Array [{book, trendScore, weeklyCount}]
+```
+
+**Logika Trend Score:**
+- Buku dengan peningkatan peminjaman mendapat score lebih tinggi
+- Formula: `weeklyCount / avgWeeklyCount`
+
+---
+
+#### B. Collaborative Filtering
+
+**Lokasi:** `src/utils/analytics.js` - fungsi `getCollaborativeRecommendations()`
+
+**Mekanisme:**
+```
+Input: targetBookId, Array loans
+Process:
+  1. Find semua user yang pernah pinjam targetBook
+  2. Find semua buku lain yang dipinjam user tersebut
+  3. Count frequency peminjaman (co-occurrence)
+  4. Rank by frequency (similarity score)
+  5. Filter out targetBook dari hasil
+Output: Array [{book, similarityScore, coOccurrence}]
+```
+
+**Logika "People who borrowed X also borrowed Y":**
+```javascript
+// Pseudocode
+targetUsers = loans.filter(l => l.bookId === targetBook).map(l => l.userId)
+otherBooks = loans.filter(l => targetUsers.includes(l.userId) && l.bookId !== targetBook)
+recommendations = count(otherBooks.bookId).sortDesc()
+```
+
+---
+
+#### C. Content-Based Filtering
+
+**Lokasi:** `src/utils/analytics.js` - fungsi `getContentBasedRecommendations()`
+
+**Mekanisme:**
+```
+Input: userId, Array loans, Array books
+Process:
+  1. Get riwayat peminjaman user
+  2. Extract kategori dari buku yang pernah dipinjam
+  3. Find kategori favorit (most frequent)
+  4. Get buku-buku dari kategori yang sama (yang belum pernah dipinjam)
+  5. Sort by rating dan availability
+Output: Array [{book, matchScore, reason}]
+```
+
+**Category Matching:**
+```javascript
+// Pseudocode
+userBooks = loans.filter(l => l.userId === userId).map(l => l.bookId)
+userCategories = books.filter(b => userBooks.includes(b.id)).map(b => b.category)
+favoriteCategory = mostFrequent(userCategories)
+recommendations = books.filter(b => b.category === favoriteCategory && !userBooks.includes(b.id))
+```
+
+---
+
+### 7. Data Filtering System
+
+**Date Range Filter:**
+```javascript
+// Digunakan di semua halaman
+const filtered = data.filter(item => {
+  const itemDate = new Date(item.timestamp);
+  return itemDate >= startDate && itemDate <= endDate;
+});
+```
+
+**Search Filter (Visitor Table):**
+```javascript
+const searched = visitors.filter(v => 
+  v.name.toLowerCase().includes(query) ||
+  v.nim.includes(query) ||
+  v.faculty.toLowerCase().includes(query)
+);
+```
+
+**Status Filter (Loans):**
+```javascript
+// Filter: all | active | returned | late
+const filtered = loans.filter(l => 
+  status === 'all' || l.status === status
+);
+```
+
+---
+
+## Data Flow Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Data Sources                          │
+├─────────────────────────────────────────────────────────────┤
+│  [Gate System API]  →  Visitor Data (entry/exit time)       │
+│  [SLiMS API]        →  Books & Loans Data                   │
+│  [Dummy Data]       →  Demo/Development Mode                │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     Service Layer                            │
+├─────────────────────────────────────────────────────────────┤
+│  visitorService.js  │  loanService.js  │  bookService.js    │
+│  - getVisitors()    │  - getLoans()    │  - getBooks()      │
+│  - getActiveVisitors│  - getLoanStats()│  - getBookById()   │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     React Hooks                              │
+├─────────────────────────────────────────────────────────────┤
+│  useDataFetch()     │  Custom hooks for data management     │
+│  useVisitors()      │  Auto-refresh, loading states         │
+│  useLoans()         │  Error handling                       │
+│  useDashboardData() │  Combined data fetching               │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Analytics Layer                            │
+├─────────────────────────────────────────────────────────────┤
+│  analytics.js (20+ functions)                               │
+│  - getVisitorTrend() - getPeakHours() - getTopBooks()       │
+│  - getCategoryPopularity() - getCollaborativeRec()          │
+│  - getContentBasedRec() - getDashboardSummary()             │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     UI Components                            │
+├─────────────────────────────────────────────────────────────┤
+│  Pages: Dashboard, Visitors, Loans, Recommendations         │
+│  Components: Charts, Tables, Cards, Filters                 │
+│  Visualizations: Recharts (Line, Bar, Pie, Area charts)     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Tech Stack
+
+| Technology | Purpose | Version |
+|------------|---------|---------|
+| **React** | UI Library dengan Hooks | 18.x |
+| **Tailwind CSS** | Utility-first Styling | 3.x |
+| **Recharts** | Data Visualization | 2.x |
+| **Lucide React** | Modern Icons | Latest |
+| **date-fns** | Date Manipulation | 3.x |
 
 ---
 
 ## Instalasi
 
 ### Prerequisites
-- Node.js 16+ 
+- Node.js 16+
 - npm atau yarn
 
 ### Quick Start
@@ -93,7 +337,7 @@ Dashboard Analytics Perpustakaan Prototype adalah aplikasi web berbasis React ya
 # Clone repository
 git clone https://github.com/alvahraa/prototype-dashboard.git
 
-# Masuk ke direktori project
+# Masuk ke direktori
 cd prototype-dashboard
 
 # Install dependencies
@@ -103,22 +347,7 @@ npm install
 npm start
 ```
 
-Buka [http://localhost:3000](http://localhost:3000) di browser.
-
-### Environment Variables
-
-Salin `.env.example` ke `.env.local` dan sesuaikan nilai:
-
-```bash
-cp .env.example .env.local
-```
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `REACT_APP_DATA_MODE` | Mode data: `dummy` atau `production` | `dummy` |
-| `REACT_APP_GATE_API_URL` | URL Gate System API | `http://localhost:8080/api/gate` |
-| `REACT_APP_SLIMS_API_URL` | URL SLiMS API | `http://localhost/slims/api` |
-| `REACT_APP_REFRESH_INTERVAL` | Auto refresh interval (ms) | `300000` |
+Buka http://localhost:3000 di browser.
 
 ---
 
@@ -127,171 +356,83 @@ cp .env.example .env.local
 ```
 prototype-dashboard/
 ├── public/
-│   ├── images/              # Folder untuk upload gambar
+│   ├── images/
+│   │   ├── demo/          # Screenshot untuk dokumentasi
+│   │   └── assets/        # Logo dan icon
 │   ├── index.html
 │   └── manifest.json
 │
 ├── src/
 │   ├── components/
-│   │   ├── Common/          # Shared components (Loading, Error, etc)
-│   │   ├── Dashboard/       # KPICards, TrendChart, CategoryChart
-│   │   ├── Layout/          # Sidebar, Header
-│   │   ├── Loans/           # TopBooksGrid, CategoryBar, LateStats
-│   │   ├── Recommendations/ # Trending, Collaborative, ContentBased
-│   │   └── Visitors/        # PeakHours, FacultyPie, VisitorTable
+│   │   ├── Common/        # Loading, Error, DatePicker, etc.
+│   │   ├── Dashboard/     # KPICards, TrendChart, CategoryChart
+│   │   ├── Layout/        # Sidebar, Header
+│   │   ├── Loans/         # TopBooksGrid, LoanTrendChart
+│   │   ├── Recommendations/# Trending, Collaborative, ContentBased
+│   │   └── Visitors/      # PeakHours, FacultyPie, VisitorTable
 │   │
 │   ├── data/
-│   │   └── generateDummyData.js  # Generator data dummy
+│   │   └── generateDummyData.js  # Data dummy untuk demo
 │   │
 │   ├── hooks/
-│   │   ├── index.js
-│   │   └── useDataFetch.js       # Custom hooks untuk data fetching
+│   │   └── useDataFetch.js       # Custom hooks
 │   │
 │   ├── pages/
 │   │   ├── DashboardPage.jsx
 │   │   ├── VisitorsPage.jsx
 │   │   ├── LoansPage.jsx
 │   │   ├── RecommendationsPage.jsx
-│   │   ├── LoginPage.jsx
-│   │   └── index.js
+│   │   └── LoginPage.jsx
 │   │
 │   ├── services/
-│   │   ├── api.js                # API configuration
-│   │   ├── visitorService.js     # Visitor data service
-│   │   ├── loanService.js        # Loan data service
-│   │   ├── bookService.js        # Book data service
-│   │   └── index.js
+│   │   ├── api.js               # API configuration
+│   │   ├── visitorService.js    # Visitor CRUD
+│   │   ├── loanService.js       # Loan CRUD
+│   │   └── bookService.js       # Book CRUD
 │   │
 │   ├── utils/
-│   │   └── analytics.js          # Analytics functions (20+)
+│   │   └── analytics.js         # 20+ analytic functions
 │   │
 │   ├── App.js
-│   ├── index.js
 │   └── index.css
 │
-├── .env.example
-├── .gitignore
-├── LICENSE
 ├── package.json
-├── postcss.config.js
-├── tailwind.config.js
 └── README.md
 ```
 
 ---
 
-## Tech Stack
+## Mode Data
 
-| Technology | Purpose |
-|------------|---------|
-| **React 18** | UI Library dengan Hooks |
-| **Tailwind CSS** | Utility-first CSS Framework |
-| **Recharts** | Charts & Visualizations |
-| **Lucide React** | Modern Icon Library |
-| **date-fns** | Date Utilities |
+Dashboard mendukung 2 mode:
 
----
+| Mode | Keterangan |
+|------|------------|
+| `dummy` | Menggunakan data dummy (1000 visitors, 200 books, 2000 loans) |
+| `production` | Terhubung ke Gate System & SLiMS API |
 
-## Algoritma Rekomendasi
-
-### 1. Trending Books
-```javascript
-// Filter loans dalam 7 hari terakhir
-// Count per book, sort descending
-// Return top N
-```
-
-### 2. Collaborative Filtering
-```javascript
-// 1. Find users yang pinjam targetBook
-// 2. Find buku lain yang dipinjam users tersebut
-// 3. Rank by frequency (similarity score)
-// "People who borrowed X also borrowed Y"
-```
-
-### 3. Content-Based Filtering
-```javascript
-// 1. Get riwayat peminjaman user
-// 2. Find kategori favorit (most frequent)
-// 3. Recommend buku dari kategori sama (sorted by rating)
-```
-
----
-
-## Design System
-
-### Colors
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--primary` | #000000 | Buttons, active states |
-| `--secondary` | #f5f5f5 | Backgrounds |
-| `--text` | #333333 | Body text |
-| `--text-secondary` | #666666 | Muted text |
-
-### Typography
-- **Font**: Inter (Google Fonts)
-- **Headings**: 600-700 weight
-- **Body**: 400-500 weight
-
----
-
-## Data Dummy
-
-| Entity | Count | Description |
-|--------|-------|-------------|
-| **Visitors** | 1000 | 30 hari, pola realistis |
-| **Books** | 200 | 6 kategori, ISBN unik |
-| **Loans** | 2000 | Status: active, returned, late |
+Default mode adalah `dummy` untuk development dan demo.
 
 ---
 
 ## Kontribusi
 
-Kontribusi sangat diterima! Silakan:
-
-1. Fork repository ini
-2. Buat branch fitur (`git checkout -b feature/AmazingFeature`)
-3. Commit perubahan (`git commit -m 'Add some AmazingFeature'`)
-4. Push ke branch (`git push origin feature/AmazingFeature`)
+1. Fork repository
+2. Buat branch fitur (`git checkout -b feature/NamaFitur`)
+3. Commit perubahan (`git commit -m 'Add NamaFitur'`)
+4. Push ke branch (`git push origin feature/NamaFitur`)
 5. Buat Pull Request
-
----
-
-## Troubleshooting
-
-### CSS Lint Warnings
-Warning `@tailwind` dan `@apply` di editor adalah **NORMAL**.
-```json
-// VS Code settings.json
-{ "css.lint.unknownAtRules": "ignore" }
-```
-
-### Port Already in Use
-```bash
-# Windows
-netstat -ano | findstr :3000
-taskkill /PID <PID> /F
-```
-
-### npm tidak dikenali
-```powershell
-# Gunakan path lengkap
-$env:Path = "C:\Program Files\nodejs;" + $env:Path
-npm install
-```
 
 ---
 
 ## Author
 
-- **Alvah Rabbany** - *Proyek Magang - Prototype Dashboard Perpustakaan*
+**Alvah Rabbany** - *Proyek Prototype Dashboard Analytics*
 
 ---
 
 <div align="center">
 
-**Made with love for better library analytics**
-
-Star this repo if you find it useful!
+**Prototype Dashboard untuk Monitoring Perpustakaan Modern**
 
 </div>

@@ -244,7 +244,7 @@ const COVER_COLORS = [
  */
 function generateVisitors() {
   const visitors = [];
-  const baseDate = new Date('2024-01-05'); // Today's reference date
+  const baseDate = new Date(); // Use current date
   const uniqueNIMs = new Set();
   
   // Pre-generate ~300 unique students who will be visitors
@@ -433,7 +433,7 @@ function generateLoans(visitors, books) {
     return 1;
   });
   
-  const baseDate = new Date('2024-01-05');
+  const baseDate = new Date(); // Use current date
   
   for (let i = 0; i < 2000; i++) {
     const loanId = `L${String(i + 1).padStart(4, '0')}`;

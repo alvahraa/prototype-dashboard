@@ -6,7 +6,8 @@ import {
   BookOpen, 
   Sparkles,
   LogOut,
-  User
+  User,
+  Terminal
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -24,6 +25,11 @@ const menuItems = [
   { id: 'visitors', label: 'Kunjungan', icon: Users },
   { id: 'loans', label: 'Peminjaman', icon: BookOpen },
   { id: 'recommendations', label: 'Rekomendasi', icon: Sparkles },
+];
+
+// System tools (separate section)
+const systemItems = [
+  { id: 'console', label: 'System Console', icon: Terminal },
 ];
 
 // Smooth, luxurious spring transition config
@@ -137,6 +143,50 @@ function Sidebar({ activePage, onNavigate, user, onLogout }) {
             );
           })}
         </ul>
+
+        {/* System Tools - Separate Section */}
+        <div className="mt-4 pt-4 border-t border-gray-800">
+          <p className="px-4 text-xs text-gray-500 uppercase tracking-wider mb-2">System</p>
+          <ul className="space-y-1 px-3">
+            {systemItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activePage === item.id;
+              
+              return (
+                <li key={item.id}>
+                  <motion.button
+                    onClick={() => onNavigate(item.id)}
+                    whileHover={{ x: 4 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={smoothSpring}
+                    className={cn(
+                      "relative w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200",
+                      isActive 
+                        ? 'text-black font-medium' 
+                        : 'text-gray-300 hover:text-white'
+                    )}
+                  >
+                    <AnimatePresence mode="wait">
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeSystemBg"
+                          className="absolute inset-0 bg-emerald-500 rounded-xl"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={smoothSpring}
+                        />
+                      )}
+                    </AnimatePresence>
+                    
+                    <Icon className={`relative z-10 w-5 h-5 ${isActive ? 'text-white' : ''}`} />
+                    <span className={`relative z-10 ${isActive ? 'text-white' : ''}`}>{item.label}</span>
+                  </motion.button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </nav>
 
       {/* User Info & Logout */}

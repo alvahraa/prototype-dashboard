@@ -3,3 +3,4 @@ export { default as VisitorsPage } from './VisitorsPage';
 export { default as LoansPage } from './LoansPage';
 export { default as RecommendationsPage } from './RecommendationsPage';
 export { default as LoginPage } from './LoginPage';
+export { default as ConsolePage } from './ConsolePage';

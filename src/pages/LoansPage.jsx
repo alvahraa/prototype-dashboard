@@ -214,6 +214,23 @@ function LoansPage() {
                     <span className="chip chip-success">Aktif: {activeLoans}</span>
                     <span className="chip chip-neutral">Selesai: {totalLoans - activeLoans}</span>
                     <span className="chip chip-error">Terlambat: {lateAnalysis.totalLate}</span>
+                    <button 
+                      onClick={() => {
+                        const { exportToExcel } = require('../utils/exportToExcel');
+                        const data = loans?.slice(0, 50).map(l => ({
+                          'ID': l.id,
+                          'Buku': l.bookTitle || 'Unknown',
+                          'Peminjam': l.borrowerName || l.memberId,
+                          'Tanggal Pinjam': new Date(l.loanDate).toLocaleDateString('id-ID'),
+                          'Status': l.returnDate ? 'Dikembalikan' : l.isLate ? 'Terlambat' : 'Aktif',
+                        }));
+                        exportToExcel(data, 'Loan_History', 'History');
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors ml-2"
+                    >
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M12 11v6"/><path d="m9 14 3 3 3-3"/></svg>
+                      <span>Export</span>
+                    </button>
                   </div>
                 </div>
                 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './index.css';
 import { Sidebar, Header } from './components/Layout';
-import { DashboardPage, VisitorsPage, LoansPage, RecommendationsPage, LoginPage } from './pages';
+import { DashboardPage, VisitorsPage, LoansPage, RecommendationsPage, LoginPage, ConsolePage } from './pages';
 import { DataModeIndicator } from './components/Common';
 
 /**
@@ -84,6 +84,7 @@ function App() {
       visitors: <VisitorsPage />,
       loans: <LoansPage />,
       recommendations: <RecommendationsPage />,
+      console: <ConsolePage />,
     };
     return pages[activePage] || <DashboardPage />;
   };

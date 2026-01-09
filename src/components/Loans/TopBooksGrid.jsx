@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download } from 'lucide-react';
+import { FileDown } from 'lucide-react';
 import { ViewToggle } from '../Common';
 import { exportToExcel } from '../../utils/exportToExcel';
 
@@ -67,8 +67,8 @@ function TopBooksGrid({ books, loading = false, title = "Top 10 Buku Terpopuler"
             onClick={handleExport}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Download</span>
+            <FileDown className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Export</span>
           </button>
           <ViewToggle viewMode={viewMode} onViewChange={setViewMode} />
         </div>

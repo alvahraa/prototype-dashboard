@@ -1,31 +1,50 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BarChart3, Table2, PieChart } from 'lucide-react';
 import { 
   PeakHoursHeatmap, 
   FacultyPieChart, 
   VisitorTable, 
   VisitorStats 
 } from '../components/Visitors';
-import { LoadingPage, ErrorMessage, RefreshButton, DateRangePicker, LastUpdated } from '../components/Common';
+import { 
+  LoadingPage, 
+  ErrorMessage, 
+  RefreshButton, 
+  DateRangePicker, 
+  LastUpdated,
+  Tabs,
+} from '../components/Common';
 import { useVisitors } from '../hooks';
 import * as analytics from '../utils/analytics';
 
 /**
- * Visitors Page
+ * Visitors Page - Tab-Based Architecture
  * 
- * Analisis kunjungan dengan:
- * - Visitor Stats (3 metrics)
- * - Peak Hours Heatmap
- * - Faculty Pie Chart
- * - Visitor Table (real-time log)
- * 
- * Terintegrasi dengan API service layer:
- * - Loading states saat fetch data
- * - Error handling jika gagal
- * - Refresh button untuk update manual
- * - Date range filter
+ * Three tabs for content hierarchy:
+ * 1. Overview & Analytics - Charts and KPIs
+ * 2. Visitor Logs - Data table
+ * 3. Demographics - Faculty distribution
  */
 
+// Tab definitions
+const tabs = [
+  { id: 'overview', label: 'Overview', icon: BarChart3 },
+  { id: 'logs', label: 'Visitor Logs', icon: Table2 },
+  { id: 'demographics', label: 'Demographics', icon: PieChart },
+];
+
+// Tab content animation
+const tabContentVariants = {
+  enter: { opacity: 0, y: 10 },
+  center: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 },
+};
+
 function VisitorsPage() {
+  // Active tab state
+  const [activeTab, setActiveTab] = useState('overview');
+  
   // Date range state - default 30 hari
   const [dateRange, setDateRange] = useState(() => {
     const endDate = new Date();
@@ -37,19 +56,15 @@ function VisitorsPage() {
     };
   });
 
-  // Last updated timestamp
   const [lastUpdated, setLastUpdated] = useState(null);
-
-  // Fetch visitors data using hook
   const { data: visitors, loading, error, refetch } = useVisitors(dateRange);
 
-  // Handle refresh with timestamp update
   const handleRefresh = useCallback(() => {
     refetch();
     setLastUpdated(new Date());
   }, [refetch]);
 
-  // Memoize analytics calculations - only when data is available
+  // Analytics calculations
   const peakHours = useMemo(() => {
     if (!visitors) return [];
     return analytics.calculatePeakHours(visitors);
@@ -70,12 +85,10 @@ function VisitorsPage() {
     return visitors.length;
   }, [visitors]);
 
-  // Loading state
   if (loading && !visitors) {
     return <LoadingPage message="Memuat data kunjungan..." />;
   }
 
-  // Error state
   if (error && !visitors) {
     return (
       <ErrorMessage 
@@ -88,8 +101,8 @@ function VisitorsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header with filters & refresh */}
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <DateRangePicker 
             value={dateRange}
@@ -103,7 +116,7 @@ function VisitorsPage() {
         />
       </div>
 
-      {/* Error banner (for refresh errors) */}
+      {/* Error banner */}
       {error && visitors && (
         <ErrorMessage 
           message={error} 
@@ -112,32 +125,97 @@ function VisitorsPage() {
         />
       )}
 
-      {/* Stats Cards */}
-      <VisitorStats 
-        durationStats={durationStats}
-        peakHours={peakHours}
-        totalMonthVisits={totalMonthVisits}
-      />
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PeakHoursHeatmap 
-          data={peakHours} 
-          title="Distribusi Jam Kunjungan"
+      {/* Tab Navigation */}
+      <div className="flex items-center justify-between">
+        <Tabs 
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
-        <FacultyPieChart 
-          data={facultyDistribution} 
-          title="Distribusi per Fakultas"
-        />
+        
+        {/* Quick Stats Badge */}
+        <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
+          <span className="font-medium text-gray-900">{totalMonthVisits.toLocaleString('id-ID')}</span>
+          <span>pengunjung bulan ini</span>
+        </div>
       </div>
 
-      {/* Visitor Table */}
-      {visitors && (
-        <VisitorTable 
-          visitors={visitors} 
-          title="Log Pengunjung Terbaru"
-        />
-      )}
+      {/* Tab Content with Animation */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          variants={tabContentVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{
+            type: "spring",
+            stiffness: 200,
+            damping: 25,
+          }}
+        >
+          {/* Overview Tab */}
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              {/* Stats Cards */}
+              <VisitorStats 
+                durationStats={durationStats}
+                peakHours={peakHours}
+                totalMonthVisits={totalMonthVisits}
+              />
+              
+              {/* Peak Hours Chart - Full Width */}
+              <PeakHoursHeatmap 
+                data={peakHours} 
+                title="Distribusi Jam Kunjungan"
+              />
+            </div>
+          )}
+
+          {/* Visitor Logs Tab */}
+          {activeTab === 'logs' && visitors && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Log Pengunjung
+                </h2>
+                <span className="text-sm text-gray-500">
+                  {visitors.length.toLocaleString('id-ID')} entries
+                </span>
+              </div>
+              <VisitorTable 
+                visitors={visitors} 
+                title=""
+              />
+            </div>
+          )}
+
+          {/* Demographics Tab */}
+          {activeTab === 'demographics' && (
+            <div className="space-y-6">
+              {/* Faculty Pie Chart - Featured */}
+              <FacultyPieChart 
+                data={facultyDistribution} 
+                title="Distribusi per Fakultas"
+              />
+              
+              {/* Additional Demographics Info */}
+              <div className="card">
+                <h3 className="card-header">Insight Demographics</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {facultyDistribution.slice(0, 4).map((faculty, index) => (
+                    <div key={faculty.name} className="text-center p-4 bg-gray-50 rounded-xl">
+                      <p className="text-2xl font-bold text-gray-900">{faculty.percentage}%</p>
+                      <p className="text-sm text-gray-500 mt-1">{faculty.name}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{faculty.count.toLocaleString('id-ID')} visitors</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

@@ -30,7 +30,7 @@ const CustomTooltip = ({ active, payload }) => {
         <p className="text-sm font-medium">{data.hour}</p>
         <p className="text-lg font-bold">{data.visits} pengunjung</p>
         {data.isPeak && (
-          <p className="text-xs text-yellow-400 mt-1">⚡ Jam Sibuk</p>
+          <p className="text-xs text-yellow-400 mt-1">Jam Sibuk</p>
         )}
       </div>
     );

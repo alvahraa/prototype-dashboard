@@ -7,7 +7,7 @@ import React from 'react';
  * Layout: 5 kolom, 2 baris
  */
 
-function TopBooksGrid({ books, loading = false, title = "📚 Top 10 Buku Terpopuler" }) {
+function TopBooksGrid({ books, loading = false, title = "Top 10 Buku Terpopuler" }) {
   if (loading) {
     return (
       <div className="card">
@@ -48,7 +48,7 @@ function TopBooksGrid({ books, loading = false, title = "📚 Top 10 Buku Terpop
                   background: `linear-gradient(135deg, ${getBookColor(index)}, ${getBookColor(index)}dd)`,
                 }}
               >
-                📖
+                B
               </div>
             </div>
 

@@ -138,7 +138,7 @@ function RecommendationsPage() {
 
       {/* Algorithm Explanation */}
       <section className="card bg-gray-50">
-        <h3 className="font-bold text-lg mb-4">💡 Bagaimana Sistem Rekomendasi Bekerja?</h3>
+        <h3 className="font-bold text-lg mb-4">Bagaimana Sistem Rekomendasi Bekerja?</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <h4 className="font-semibold mb-2 flex items-center gap-2">

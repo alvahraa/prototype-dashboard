@@ -123,7 +123,7 @@ function DashboardPage() {
 
       {/* Top Books Section */}
       <div className="card">
-        <h3 className="card-header">📚 Buku Terpopuler Bulan Ini</h3>
+        <h3 className="card-header">Buku Terpopuler Bulan Ini</h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {topBooks.map((book, index) => (
             <div 
@@ -140,7 +140,7 @@ function DashboardPage() {
                     backgroundColor: ['#000', '#333', '#555', '#777', '#999'][index],
                   }}
                 >
-                  📖
+                  <span className="text-lg">B</span>
                 </div>
               </div>
               <p className="text-sm font-medium line-clamp-2 mb-1" title={book.title}>

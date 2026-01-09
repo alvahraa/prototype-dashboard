@@ -2,3 +2,4 @@ export { LoadingSpinner, LoadingCard, LoadingPage, LoadingOverlay } from './Load
 export { ErrorMessage, EmptyState } from './ErrorMessage';
 export { RefreshButton, DataModeIndicator, LastUpdated } from './RefreshButton';
 export { default as DateRangePicker } from './DateRangePicker';
+export { MotionCard, MotionContainer, MotionButton, MotionPage, MotionGrid } from './Motion';

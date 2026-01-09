@@ -17,7 +17,7 @@ function BookCard({ book }) {
           background: `linear-gradient(135deg, #0f3460, #1a365d)`,
         }}
       >
-        📚
+        B
       </div>
       
       {/* Category Tag */}
@@ -50,7 +50,7 @@ function ContentBasedRecs({
   selectedUserId,
   onSelectUser,
   loading = false,
-  title = "📚 Rekomendasi Untuk Anda"
+  title = "Rekomendasi Untuk Anda"
 }) {
   if (loading) {
     return (

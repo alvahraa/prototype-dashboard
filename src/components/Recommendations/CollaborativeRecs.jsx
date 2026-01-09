@@ -17,7 +17,7 @@ function BookCard({ book }) {
           background: `linear-gradient(135deg, #2d3748, #1a202c)`,
         }}
       >
-        📖
+        B
       </div>
       
       {/* Info */}
@@ -45,7 +45,7 @@ function CollaborativeRecs({
   selectedBookId,
   onSelectBook,
   loading = false,
-  title = "👥 Yang Meminjam Ini Juga Meminjam..."
+  title = "Yang Meminjam Ini Juga Meminjam..."
 }) {
   if (loading) {
     return (

@@ -7,7 +7,7 @@ import { TrendingUp, BookOpen } from 'lucide-react';
  * Display top trending books minggu ini dalam list format
  */
 
-function TrendingBooks({ books, loading = false, title = "🔥 Trending Minggu Ini" }) {
+function TrendingBooks({ books, loading = false, title = "Trending Minggu Ini" }) {
   if (loading) {
     return (
       <div className="card">

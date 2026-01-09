@@ -47,7 +47,7 @@ export function DataModeIndicator() {
 
   return (
     <div className="fixed bottom-4 right-4 bg-yellow-100 border border-yellow-300 text-yellow-800 px-3 py-1.5 rounded-full text-xs font-medium shadow-lg z-50">
-      🔧 Mode Demo (Data Dummy)
+      Mode Demo (Data Dummy)
     </div>
   );
 }

@@ -114,7 +114,7 @@ function LoansPage() {
 
       {/* Late Returns Stats */}
       <section>
-        <h2 className="text-xl font-bold mb-4">⚠️ Analisis Keterlambatan</h2>
+        <h2 className="text-xl font-bold mb-4">Analisis Keterlambatan</h2>
         <LateReturnStats lateAnalysis={lateAnalysis} />
       </section>
 
@@ -126,10 +126,10 @@ function LoansPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Loan Trend */}
-        <LoanTrendChart data={loanTrend} title="📈 Trend Peminjaman 6 Bulan" />
+        <LoanTrendChart data={loanTrend} title="Trend Peminjaman 6 Bulan" />
         
         {/* Category Popularity */}
-        <CategoryBarChart data={categoryPop} title="📊 Kategori Paling Diminati" />
+        <CategoryBarChart data={categoryPop} title="Kategori Paling Diminati" />
       </div>
     </div>
   );

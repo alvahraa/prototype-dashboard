@@ -32,7 +32,7 @@ function LoanTrendChart({ data, loading = false, title = "Trend Peminjaman 6 Bul
     return (
       <div className="card">
         <h3 className="card-header">{title}</h3>
-        <div className="h-64 bg-gray-100 rounded animate-pulse"></div>
+        <div className="h-64 bg-gray-100 dark:bg-dark-700 rounded animate-pulse"></div>
       </div>
     );
   }
@@ -90,14 +90,14 @@ function LoanTrendChart({ data, loading = false, title = "Trend Peminjaman 6 Bul
       </div>
 
       {/* Stats */}
-      <div className="mt-4 pt-4 border-t border-border flex justify-between text-sm">
+      <div className="mt-4 pt-4 border-t border-border dark:border-dark-border-accent flex justify-between text-sm">
         <div>
-          <span className="text-text-secondary">Total 6 bulan: </span>
-          <span className="font-semibold">{total.toLocaleString('id-ID')} peminjaman</span>
+          <span className="text-text-secondary dark:text-slate-400">Total 6 bulan: </span>
+          <span className="font-semibold dark:text-slate-200">{total.toLocaleString('id-ID')} peminjaman</span>
         </div>
         <div>
-          <span className="text-text-secondary">Rata-rata: </span>
-          <span className="font-semibold">{avg.toLocaleString('id-ID')}/bulan</span>
+          <span className="text-text-secondary dark:text-slate-400">Rata-rata: </span>
+          <span className="font-semibold dark:text-slate-200">{avg.toLocaleString('id-ID')}/bulan</span>
         </div>
       </div>
     </div>

@@ -54,19 +54,19 @@ function KPICard({ icon: Icon, label, value, subLabel, trend, loading, index }) 
         delay: index * 0.08 
       }}
       whileHover={{ y: -3 }}
-      className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+      className="bg-white dark:bg-dark-800 rounded-2xl p-6 border border-gray-100 dark:border-dark-border-accent shadow-sm hover:shadow-md dark:shadow-dark-sm transition-all duration-300"
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           {/* Label - Muted */}
-          <p className="text-sm text-gray-500 font-medium mb-3">{label}</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400 font-medium mb-3">{label}</p>
           
           {/* Value */}
           <div className="flex items-baseline gap-3">
             {loading ? (
-              <div className="h-10 w-20 bg-gray-100 rounded-lg animate-pulse"></div>
+              <div className="h-10 w-20 bg-gray-100 dark:bg-dark-700 rounded-lg animate-pulse"></div>
             ) : (
-              <span className="text-3xl font-bold text-gray-900 tracking-tight">
+              <span className="text-3xl font-bold text-gray-900 dark:text-slate-100 tracking-tight">
                 {animatedValue.toLocaleString('id-ID')}
               </span>
             )}
@@ -75,10 +75,10 @@ function KPICard({ icon: Icon, label, value, subLabel, trend, loading, index }) 
             {trend !== null && !loading && (
               <span className={`text-xs font-medium flex items-center gap-0.5 px-2 py-1 rounded-full ${
                 trend > 0 
-                  ? 'text-emerald-600 bg-emerald-50' 
+                  ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10' 
                   : trend < 0 
-                  ? 'text-rose-600 bg-rose-50' 
-                  : 'text-gray-500 bg-gray-100'
+                  ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10' 
+                  : 'text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-dark-700'
               }`}>
                 {trend > 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                 {Math.abs(trend)}%
@@ -88,13 +88,13 @@ function KPICard({ icon: Icon, label, value, subLabel, trend, loading, index }) 
 
           {/* Sub label */}
           {subLabel && (
-            <p className="text-xs text-gray-400 mt-2">{subLabel}</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-2">{subLabel}</p>
           )}
         </div>
 
         {/* Icon - Subtle background */}
-        <div className="w-11 h-11 bg-gray-50 rounded-xl flex items-center justify-center">
-          <Icon className="w-5 h-5 text-gray-600" />
+        <div className="w-11 h-11 bg-gray-50 dark:bg-dark-700 rounded-xl flex items-center justify-center">
+          <Icon className="w-5 h-5 text-gray-600 dark:text-slate-400" />
         </div>
       </div>
     </motion.div>

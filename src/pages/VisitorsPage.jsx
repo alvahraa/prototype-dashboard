@@ -134,8 +134,8 @@ function VisitorsPage() {
         />
         
         {/* Quick Stats Badge */}
-        <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
-          <span className="font-medium text-gray-900">{totalMonthVisits.toLocaleString('id-ID')}</span>
+        <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
+          <span className="font-medium text-gray-900 dark:text-slate-100">{totalMonthVisits.toLocaleString('id-ID')}</span>
           <span>pengunjung bulan ini</span>
         </div>
       </div>
@@ -176,10 +176,10 @@ function VisitorsPage() {
           {activeTab === 'logs' && visitors && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
                   Log Pengunjung
                 </h2>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-slate-400">
                   {visitors.length.toLocaleString('id-ID')} entries
                 </span>
               </div>
@@ -204,10 +204,10 @@ function VisitorsPage() {
                 <h3 className="card-header">Insight Demographics</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   {facultyDistribution.slice(0, 4).map((faculty, index) => (
-                    <div key={faculty.name} className="text-center p-4 bg-gray-50 rounded-xl">
-                      <p className="text-2xl font-bold text-gray-900">{faculty.percentage}%</p>
-                      <p className="text-sm text-gray-500 mt-1">{faculty.name}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{faculty.count.toLocaleString('id-ID')} visitors</p>
+                    <div key={faculty.name} className="text-center p-4 bg-gray-50 dark:bg-dark-750 rounded-xl">
+                      <p className="text-2xl font-bold text-gray-900 dark:text-slate-100">{faculty.percentage}%</p>
+                      <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{faculty.name}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{faculty.count.toLocaleString('id-ID')} visitors</p>
                     </div>
                   ))}
                 </div>

@@ -53,10 +53,10 @@ const CustomLegend = ({ payload }) => {
             className="w-3 h-3 rounded-sm flex-shrink-0"
             style={{ backgroundColor: entry.color }}
           ></div>
-          <span className="text-text-secondary truncate" style={{ maxWidth: '120px' }}>
+          <span className="text-text-secondary dark:text-slate-400 truncate" style={{ maxWidth: '120px' }}>
             {entry.value}
           </span>
-          <span className="font-medium ml-auto">{entry.payload.percentage}%</span>
+          <span className="font-medium ml-auto dark:text-slate-200">{entry.payload.percentage}%</span>
         </div>
       ))}
     </div>
@@ -112,7 +112,7 @@ function FacultyPieChart({ data, loading = false, title = "Distribusi per Fakult
     return (
       <div className="card">
         <h3 className="card-header">{title}</h3>
-        <div className="h-64 bg-gray-100 rounded animate-pulse"></div>
+        <div className="h-64 bg-gray-100 dark:bg-dark-700 rounded animate-pulse"></div>
       </div>
     );
   }
@@ -121,7 +121,7 @@ function FacultyPieChart({ data, loading = false, title = "Distribusi per Fakult
     return (
       <div className="card">
         <h3 className="card-header">{title}</h3>
-        <div className="h-64 flex items-center justify-center text-text-secondary">
+        <div className="h-64 flex items-center justify-center text-text-secondary dark:text-slate-400">
           Tidak ada data
         </div>
       </div>

@@ -140,11 +140,11 @@ function LoansPage() {
         
         {/* Quick Stats */}
         <div className="hidden md:flex items-center gap-4 text-sm">
-          <div className="text-gray-500">
-            <span className="font-semibold text-gray-900">{totalLoans.toLocaleString('id-ID')}</span> total
+          <div className="text-gray-500 dark:text-slate-400">
+            <span className="font-semibold text-gray-900 dark:text-slate-100">{totalLoans.toLocaleString('id-ID')}</span> total
           </div>
-          <div className="text-gray-500">
-            <span className="font-semibold text-emerald-600">{activeLoans.toLocaleString('id-ID')}</span> aktif
+          <div className="text-gray-500 dark:text-slate-400">
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">{activeLoans.toLocaleString('id-ID')}</span> aktif
           </div>
         </div>
       </div>
@@ -192,11 +192,11 @@ function LoansPage() {
                   {categoryPop.slice(0, 6).map((cat, index) => (
                     <div 
                       key={cat.category} 
-                      className="text-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                      className="text-center p-4 bg-gray-50 dark:bg-dark-750 rounded-xl hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
                     >
-                      <p className="text-2xl font-bold text-gray-900">{cat.percentage}%</p>
-                      <p className="text-sm text-gray-500 mt-1 line-clamp-1">{cat.category}</p>
-                      <p className="text-xs text-gray-400">{cat.count.toLocaleString('id-ID')} pinjam</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-slate-100">{cat.percentage}%</p>
+                      <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 line-clamp-1">{cat.category}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500">{cat.count.toLocaleString('id-ID')} pinjam</p>
                     </div>
                   ))}
                 </div>
@@ -226,7 +226,7 @@ function LoansPage() {
                         }));
                         exportToExcel(data, 'Loan_History', 'History');
                       }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors ml-2"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 rounded-lg transition-colors ml-2"
                     >
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M12 11v6"/><path d="m9 14 3 3 3-3"/></svg>
                       <span>Export</span>
@@ -252,7 +252,7 @@ function LoansPage() {
                           <td className="font-mono text-sm">{loan.id}</td>
                           <td className="font-medium">{loan.bookTitle || 'Unknown'}</td>
                           <td>{loan.borrowerName || loan.memberId}</td>
-                          <td className="text-gray-500">
+                          <td className="text-gray-500 dark:text-slate-400">
                             {new Date(loan.loanDate).toLocaleDateString('id-ID')}
                           </td>
                           <td>
@@ -270,7 +270,7 @@ function LoansPage() {
                   </table>
                 </div>
                 
-                <p className="text-sm text-gray-400 mt-4 text-center">
+                <p className="text-sm text-gray-400 dark:text-slate-500 mt-4 text-center">
                   Menampilkan 10 dari {totalLoans.toLocaleString('id-ID')} peminjaman
                 </p>
               </div>

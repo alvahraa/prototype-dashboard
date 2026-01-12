@@ -110,8 +110,8 @@ function Sidebar({ activePage, onNavigate, user, onLogout }) {
                     'relative w-full flex items-center gap-3 px-4 py-3 rounded-xl',
                     'transition-colors duration-200 text-left',
                     isActive 
-                      ? 'text-dark-950 font-medium' 
-                      : 'text-dark-text-secondary hover:text-dark-text-primary'
+                      ? 'text-gray-900 dark:text-slate-50 font-medium' 
+                      : 'text-dark-text-secondary hover:text-dark-text-primary dark:hover:text-slate-200'
                   )}
                 >
                   {/* Active Background Pill with layoutId for smooth transitions */}
@@ -119,7 +119,7 @@ function Sidebar({ activePage, onNavigate, user, onLogout }) {
                     {isActive && (
                       <motion.div
                         layoutId="activeNavBg"
-                        className="absolute inset-0 bg-white rounded-xl"
+                        className="absolute inset-0 bg-white dark:bg-gray-700 rounded-xl shadow-sm"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}

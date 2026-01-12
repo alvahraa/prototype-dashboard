@@ -163,14 +163,14 @@ function DashboardPage() {
             <motion.div 
               key={book.id}
               whileHover={{ y: -3 }}
-              className="flex flex-col items-center text-center p-5 bg-gray-50/80 rounded-2xl hover:bg-gray-100/80 transition-all duration-200 cursor-pointer"
+              className="flex flex-col items-center text-center p-5 bg-gray-50/80 dark:bg-dark-750 rounded-2xl hover:bg-gray-100/80 dark:hover:bg-dark-700 transition-all duration-200 cursor-pointer"
             >
               <div className="relative mb-4">
-                <div className="absolute -top-2 -left-2 w-7 h-7 bg-black text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
+                <div className="absolute -top-2 -left-2 w-7 h-7 bg-gray-900 dark:bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
                   {index + 1}
                 </div>
                 <div 
-                  className="w-14 h-18 rounded-xl shadow-md flex items-center justify-center text-white text-sm font-medium"
+                  className="w-14 rounded-xl shadow-md flex items-center justify-center text-slate-100 text-sm font-medium"
                   style={{ 
                     backgroundColor: ['#18181b', '#27272a', '#3f3f46', '#52525b', '#71717a'][index],
                     height: '72px',
@@ -179,11 +179,14 @@ function DashboardPage() {
                   B
                 </div>
               </div>
-              <p className="text-sm font-medium line-clamp-2 mb-1.5 text-gray-900" title={book.title}>
-                {book.title}
-              </p>
-              <p className="text-xs text-gray-500 mb-3">{book.author}</p>
-              <span className="text-xs font-medium bg-gray-900 text-white px-3 py-1.5 rounded-full">
+              {/* Fixed height container for title to prevent alignment issues */}
+              <div className="h-10 flex items-start justify-center mb-1.5">
+                <p className="text-sm font-medium line-clamp-2 text-gray-900 dark:text-slate-200" title={book.title}>
+                  {book.title}
+                </p>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">{book.author}</p>
+              <span className="text-xs font-medium bg-gray-900 dark:bg-indigo-600 text-slate-100 px-3 py-1.5 rounded-full">
                 {book.totalLoans} pinjam
               </span>
             </motion.div>

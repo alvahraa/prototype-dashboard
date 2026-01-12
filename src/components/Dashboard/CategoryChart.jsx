@@ -58,9 +58,9 @@ function CategoryChart({ data, loading = false, title = "Peminjaman per Kategori
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl p-6 border border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4">{title}</h3>
-        <div className="h-64 bg-gray-50 rounded-xl animate-pulse"></div>
+      <div className="bg-white dark:bg-dark-800 rounded-2xl p-6 border border-gray-100 dark:border-dark-border-accent">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100 mb-4">{title}</h3>
+        <div className="h-64 bg-gray-50 dark:bg-dark-700 rounded-xl animate-pulse"></div>
       </div>
     );
   }
@@ -71,9 +71,9 @@ function CategoryChart({ data, loading = false, title = "Peminjaman per Kategori
       initial="hidden"
       animate="visible"
       whileHover={{ y: -2, transition: { duration: 0.2 } }}
-      className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300"
+      className="bg-white dark:bg-dark-800 rounded-2xl p-6 border border-gray-100 dark:border-dark-border-accent shadow-sm hover:shadow-md dark:shadow-dark-sm transition-shadow duration-300"
     >
-      <h3 className="text-sm font-semibold text-gray-900 mb-4">{title}</h3>
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100 mb-4">{title}</h3>
       
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
@@ -124,7 +124,7 @@ function CategoryChart({ data, loading = false, title = "Peminjaman per Kategori
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-50">
+      <div className="mt-4 pt-4 border-t border-gray-50 dark:border-dark-border-accent">
         <div className="flex flex-wrap gap-4">
           {chartData.slice(0, 3).map((item, index) => (
             <div key={item.category} className="flex items-center gap-2 text-sm">
@@ -132,8 +132,8 @@ function CategoryChart({ data, loading = false, title = "Peminjaman per Kategori
                 className="w-2.5 h-2.5 rounded-full"
                 style={{ backgroundColor: COLORS[index] }}
               />
-              <span className="text-gray-500">{item.category}:</span>
-              <span className="font-semibold text-gray-900">{item.percentage}%</span>
+              <span className="text-gray-500 dark:text-slate-400">{item.category}:</span>
+              <span className="font-semibold text-gray-900 dark:text-slate-200">{item.percentage}%</span>
             </div>
           ))}
         </div>

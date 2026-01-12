@@ -8,107 +8,279 @@
 
 **Sistem dashboard analytics modern untuk monitoring perpustakaan dengan visualisasi data real-time.**
 
-[Fitur](#fitur-utama) • [Instalasi](#instalasi) • [Struktur](#struktur-project)
+[Tujuan](#tujuan-project) | [Fitur](#fitur-utama) | [Mekanisme](#mekanisme-dan-logic) | [Instalasi](#instalasi)
 
 </div>
 
 ---
 
-> ⚠️ **CATATAN PENTING:**  
+> **CATATAN PENTING:**  
 > Sistem ini masih berupa **PROTOTYPE** dan menggunakan **data dummy** untuk demonstrasi.  
 > Belum diuji coba dengan database real (Gate System / SLiMS).  
 > Diperlukan integrasi dan pengujian lebih lanjut sebelum digunakan di lingkungan produksi.
 
 ---
 
+## Tujuan Project
+
+### Latar Belakang
+
+Perpustakaan modern membutuhkan sistem monitoring yang dapat memberikan insight real-time tentang:
+- Pola kunjungan mahasiswa dan dosen
+- Tren peminjaman buku
+- Efisiensi operasional perpustakaan
+- Data-driven decision making untuk pengadaan buku dan jam operasional
+
+### Tujuan Utama
+
+1. **Visualisasi Data Real-Time**
+   - Menampilkan data kunjungan dan peminjaman dalam bentuk grafik yang mudah dipahami
+   - Memberikan overview cepat melalui KPI cards
+
+2. **Analisis Pola Kunjungan**
+   - Mengidentifikasi jam sibuk perpustakaan (peak hours)
+   - Memahami distribusi pengunjung berdasarkan fakultas
+   - Tracking durasi kunjungan
+
+3. **Monitoring Peminjaman**
+   - Mengetahui buku-buku paling populer
+   - Analisis keterlambatan pengembalian
+   - Trend peminjaman bulanan
+
+4. **Prototype untuk Integrasi**
+   - Sebagai proof-of-concept sebelum integrasi dengan Gate System dan SLiMS
+   - Template untuk pengembangan dashboard perpustakaan lainnya
+
+---
+
 ## Fitur Utama
 
 ### 1. Dashboard Overview
-- **KPI Cards**: Menampilkan 4 metrik utama (total buku, pengunjung hari ini, peminjaman aktif, pengunjung di perpustakaan)
-- **Trend Chart**: Grafik line chart kunjungan harian
-- **Category Chart**: Bar chart peminjaman per kategori buku
-- **Top Books**: 5 buku terpopuler bulan ini
+
+Halaman utama menampilkan ringkasan data perpustakaan:
+
+| Komponen | Fungsi |
+|----------|--------|
+| KPI Cards | 4 metrik utama dengan animated counting |
+| Trend Chart | Line chart kunjungan 7 hari terakhir |
+| Category Chart | Bar chart peminjaman per kategori |
+| Top Books | 5 buku terpopuler bulan ini |
 
 ### 2. Analisis Kunjungan
-- **Peak Hours Heatmap**: Visualisasi jam sibuk perpustakaan
-- **Faculty Distribution**: Pie chart distribusi pengunjung per fakultas
-- **Visitor Table**: Tabel pengunjung dengan fitur search, sort, dan filter
-- **Live Duration**: Durasi kunjungan real-time untuk pengunjung aktif
+
+Halaman dengan fokus pada data pengunjung:
+
+| Tab | Konten |
+|-----|--------|
+| Overview | Stats cards dan Peak Hours heatmap |
+| Visitor Logs | Tabel pengunjung dengan search dan filter |
+| Demographics | Pie chart distribusi per fakultas |
 
 ### 3. Analisis Peminjaman
-- **Top 10 Books**: Grid buku terpopuler dengan ranking badges
-- **Category Popularity**: Horizontal bar chart kategori
-- **Loan Trend**: Area chart trend peminjaman 6 bulan
-- **Late Returns**: Progress bar statistik keterlambatan
 
-### 4. Motion Design System
+Halaman dengan fokus pada data peminjaman:
 
-Dashboard menggunakan **Framer Motion** untuk animasi profesional dan smooth:
+| Tab | Konten |
+|-----|--------|
+| Analytics | Keterlambatan stats, trend chart, category chart |
+| Top Books | Grid 10 buku terpopuler dengan visual cards |
+| Loan History | Tabel riwayat peminjaman dengan export |
 
-#### Sidebar Navigation
-- **Staggered Entry**: Menu items muncul satu per satu dengan efek slide-in
-- **layoutId Transition**: Active menu pill bergerak smooth antar menu item
-- **Micro-interactions**: Hover lift dan tap feedback pada semua tombol
+### 4. Dark Mode Professional
 
-#### Chart Animations (Recharts)
-- **Line Chart**: Animasi "pencil sketch" - garis digambar dari kiri ke kanan (2 detik)
-- **Bar Chart**: Animasi grow - bar tumbuh dari bawah ke atas (1.5 detik)
-- **Glassmorphism Tooltips**: Tooltip dengan efek backdrop-blur dan transparansi
+Sistem theming dengan dua mode:
+- **Light Mode**: Clean dan professional untuk penggunaan siang hari
+- **Dark Mode**: Premium dark aesthetic untuk kenyamanan mata
 
-#### Login Page
-- **Mesh Gradient Background**: Animated organic blob shapes
-- **Glassmorphism Card**: Backdrop blur dengan semi-transparent background
-- **Input Micro-interactions**: Scale up dan glow effect saat focus
+Fitur dark mode:
+- Persistent di localStorage
+- Sinkronisasi dengan preferensi sistem
+- Typography hierarchy untuk menghindari eye strain
 
-### 5. System Console (Stealth Mode)
+### 5. Command Palette
 
-Dashboard dilengkapi dengan **System Console** - terminal emulator untuk administrasi sistem.
+Keyboard shortcut `Ctrl + K` untuk akses cepat:
+- Navigasi ke semua halaman
+- Toggle dark mode
+- Use system theme
 
-**Akses:** Tekan `Ctrl + Shift + X` (tersembunyi dari UI normal)
+### 6. System Console (Stealth Mode)
 
-**Commands yang tersedia:**
+Console tersembunyi untuk administrasi sistem, diakses dengan `Ctrl + Shift + X`:
+- Query data langsung
+- Run diagnostics
+- System status monitoring
 
-| Command | Fungsi |
-|---------|--------|
-| `help` | Menampilkan daftar command yang tersedia |
-| `clear` | Membersihkan layar terminal |
-| `whoami` | Menampilkan user aktif (admin privileged access) |
-| `status` | Menampilkan status sistem (uptime, connection, database) |
-| `select * from visitors` | Query data pengunjung (JSON format, 5 rows) |
-| `select * from books` | Query data buku (JSON format, 5 rows) |
-| `run diagnostics` | Menjalankan simulasi diagnostic check multi-step |
-| `calc <expression>` | Kalkulator matematika |
+---
 
-### 6. Command Palette (Spotlight Search)
+## Mekanisme dan Logic
 
-**Trigger:** `Ctrl + K` atau klik Search di header
+### 1. Arsitektur Data Flow
 
-**Fitur:**
-- Quick navigation ke semua halaman
-- Toggle Dark Mode
-- Use System Theme
-- Fuzzy search
-- Keyboard navigation (Arrow Up/Down, Enter, Esc)
+```
+[Data Sources]
+      |
+      v
+[Service Layer] --> API fetching, error handling
+      |
+      v
+[React Hooks] --> State management, caching
+      |
+      v
+[Analytics Functions] --> Data processing
+      |
+      v
+[UI Components] --> Visualization
+```
 
-### 7. Dark Mode (Professional)
+### 2. Visitor Trend Analysis
 
-**Toggle:** Via Command Palette (`Ctrl + K`) → "Switch to Dark Mode"
+**Lokasi**: `src/utils/analytics.js` - `getVisitorTrend()`
 
-**Fitur:**
-- **Persistent**: Preferensi disimpan di localStorage
-- **System Sync**: Default mengikuti OS preference
-- **Typography Hierarchy**: Menggunakan off-white (slate-50/200/300) untuk menghindari eye strain
-- **High-End Aesthetic**: Inspired by Linear, Vercel, GitHub Dimmed
+**Logic**:
+```javascript
+// Input: Array visitor data, jumlah hari
+// Process:
+//   1. Filter visitors berdasarkan rentang tanggal
+//   2. Group by tanggal menggunakan reduce()
+//   3. Count jumlah visitor per hari
+//   4. Sort berdasarkan tanggal ascending
+// Output: Array [{date, count, dayName}]
+```
 
-### 8. Smart Export System (Excel)
+**Kegunaan**: Menampilkan trend kunjungan untuk identifikasi pola harian dan prediksi traffic.
 
-Sistem export data ke format Excel (.xlsx) profesional.
+### 3. Peak Hours Detection
 
-| Widget | Data yang di-export |
-|--------|---------------------|
-| Visitor Table | Data pengunjung yang terfilter (nama, NIM, fakultas, jam) |
-| Top Books Grid | Top 10 buku (rank, judul, penulis, kategori, total pinjam) |
-| Loan History | Riwayat peminjaman (ID, buku, peminjam, tanggal, status) |
+**Lokasi**: `src/utils/analytics.js` - `calculatePeakHours()`
+
+**Logic**:
+```javascript
+// Input: Array visitor data
+// Process:
+//   1. Extract jam masuk (entryTime) dari setiap visitor
+//   2. Group by jam (7, 8, 9, ..., 21)
+//   3. Count jumlah visitor per jam
+//   4. Calculate persentase relatif terhadap jam tersibuk
+//   5. Mark jam dengan visits > 80% dari max sebagai "peak"
+// Output: Array [{hour, visits, isPeak, percentage}]
+```
+
+**Kegunaan**: Mengidentifikasi jam sibuk untuk optimasi staffing dan resource allocation.
+
+### 4. Faculty Distribution
+
+**Lokasi**: `src/utils/analytics.js` - `getFacultyDistribution()`
+
+**Logic**:
+```javascript
+// Input: Array visitor data
+// Process:
+//   1. Group visitors by fakultas
+//   2. Count per fakultas
+//   3. Calculate persentase dari total
+//   4. Sort descending by count
+// Output: Array [{name, count, percentage}]
+```
+
+**Kegunaan**: Memahami segmentasi pengunjung untuk targeting program literasi.
+
+### 5. Top Books Algorithm
+
+**Lokasi**: `src/utils/analytics.js` - `getTopBooks()`
+
+**Logic**:
+```javascript
+// Input: Array loans, Array books, limit
+// Process:
+//   1. Count peminjaman per bookId menggunakan reduce()
+//   2. Join dengan data buku untuk mendapat title, author, category
+//   3. Sort descending by totalLoans
+//   4. Slice untuk mendapat top N buku
+// Output: Array [{id, title, author, category, totalLoans}]
+```
+
+**Kegunaan**: Mengetahui buku populer untuk pengadaan dan penempatan display.
+
+### 6. Late Returns Analysis
+
+**Lokasi**: `src/utils/analytics.js` - `analyzeLateReturns()`
+
+**Logic**:
+```javascript
+// Input: Array loans
+// Process:
+//   1. Filter loans yang sudah dikembalikan
+//   2. Hitung selisih returnDate - dueDate
+//   3. Jika selisih > 0, tandai sebagai late
+//   4. Calculate lateRate = (totalLate / totalReturned) * 100
+//   5. Calculate avgLateDays = sum(lateDays) / totalLate
+// Output: {lateRate, avgLateDays, totalLate, totalReturned}
+```
+
+**Kegunaan**: Monitoring tingkat keterlambatan untuk policy adjustment.
+
+### 7. Category Popularity
+
+**Lokasi**: `src/utils/analytics.js` - `getCategoryPopularity()`
+
+**Logic**:
+```javascript
+// Input: Array loans, Array books
+// Process:
+//   1. Join loans dengan books berdasarkan bookId
+//   2. Group by kategori buku
+//   3. Count peminjaman per kategori
+//   4. Calculate persentase dari total
+//   5. Sort descending by count
+// Output: Array [{category, count, percentage}]
+```
+
+**Kegunaan**: Insight untuk pengadaan buku berdasarkan demand.
+
+### 8. Duration Tracking
+
+**Lokasi**: `src/utils/analytics.js` - `calculateAverageDuration()`
+
+**Logic**:
+```javascript
+// Input: Array visitor data
+// Process:
+//   1. Filter visitors yang sudah exit (memiliki exitTime)
+//   2. Calculate duration = exitTime - entryTime (dalam menit)
+//   3. Calculate average dan median
+//   4. Format ke string (contoh: "1 jam 30 menit")
+// Output: {average, median, formattedAverage, formattedMedian}
+```
+
+**Kegunaan**: Mengukur engagement pengunjung di perpustakaan.
+
+---
+
+## Data Filtering System
+
+### Date Range Filter
+
+Semua halaman mendukung filter berdasarkan rentang tanggal:
+
+```javascript
+const filtered = data.filter(item => {
+  const itemDate = new Date(item.timestamp);
+  return itemDate >= startDate && itemDate <= endDate;
+});
+```
+
+### Search Filter
+
+Visitor table mendukung pencarian teks:
+
+```javascript
+const searched = visitors.filter(v => 
+  v.name.toLowerCase().includes(query) ||
+  v.nim.includes(query) ||
+  v.faculty.toLowerCase().includes(query)
+);
+```
 
 ---
 
@@ -116,13 +288,13 @@ Sistem export data ke format Excel (.xlsx) profesional.
 
 | Technology | Purpose | Version |
 |------------|---------|---------|
-| **React** | UI Library dengan Hooks | 18.x |
-| **Tailwind CSS** | Utility-first Styling | 3.x |
-| **Recharts** | Data Visualization | 2.x |
-| **Framer Motion** | Animation Library | Latest |
-| **Lucide React** | Modern Icons | Latest |
-| **date-fns** | Date Manipulation | 3.x |
-| **xlsx** | Excel Export | Latest |
+| React | UI Library dengan Hooks | 18.x |
+| Tailwind CSS | Utility-first Styling | 3.x |
+| Recharts | Data Visualization | 2.x |
+| Framer Motion | Animation Library | Latest |
+| Lucide React | Modern Icons | Latest |
+| date-fns | Date Manipulation | 3.x |
+| xlsx | Excel Export | Latest |
 
 ---
 
@@ -157,18 +329,15 @@ Buka http://localhost:3000 di browser.
 ```
 prototype-dashboard/
 ├── public/
-│   ├── images/
-│   │   ├── demo/          # Screenshot untuk dokumentasi
-│   │   └── assets/        # Logo dan icon
 │   └── index.html
 │
 ├── src/
 │   ├── components/
-│   │   ├── Common/        # Loading, Error, DatePicker, CommandPalette
+│   │   ├── Common/        # Shared components (Tabs, DatePicker, etc.)
 │   │   ├── Dashboard/     # KPICards, TrendChart, CategoryChart
 │   │   ├── Layout/        # Sidebar, Header
-│   │   ├── Loans/         # TopBooksGrid, LoanTrendChart
-│   │   └── Visitors/      # PeakHours, FacultyPie, VisitorTable
+│   │   ├── Loans/         # TopBooksGrid, LoanTrendChart, LateReturnStats
+│   │   └── Visitors/      # PeakHoursHeatmap, FacultyPieChart, VisitorTable
 │   │
 │   ├── data/
 │   │   └── generateDummyData.js  # Data dummy untuk demo
@@ -184,13 +353,15 @@ prototype-dashboard/
 │   │   └── LoginPage.jsx
 │   │
 │   ├── services/
-│   │   ├── api.js               # API configuration
-│   │   ├── visitorService.js    # Visitor CRUD
-│   │   ├── loanService.js       # Loan CRUD
-│   │   └── bookService.js       # Book CRUD
+│   │   ├── api.js
+│   │   ├── visitorService.js
+│   │   ├── loanService.js
+│   │   └── bookService.js
 │   │
 │   ├── utils/
-│   │   └── analytics.js         # Analytic functions
+│   │   ├── analytics.js          # Analytic functions
+│   │   ├── exportToExcel.js      # Excel export utility
+│   │   └── cn.js                 # Class name utility
 │   │
 │   ├── App.js
 │   └── index.css
@@ -206,11 +377,11 @@ prototype-dashboard/
 
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl + K` | Open Command Palette |
-| `Ctrl + Shift + X` | Open System Console (Stealth Mode) |
-| `↑ ↓` | Navigate in Command Palette |
-| `Enter` | Select in Command Palette |
-| `Esc` | Close modals |
+| Ctrl + K | Open Command Palette |
+| Ctrl + Shift + X | Open System Console (Stealth Mode) |
+| Arrow Up/Down | Navigate in Command Palette |
+| Enter | Select in Command Palette |
+| Esc | Close modals |
 
 ---
 
@@ -220,16 +391,35 @@ Dashboard mendukung 2 mode:
 
 | Mode | Keterangan |
 |------|------------|
-| `dummy` | Menggunakan data dummy (1000 visitors, 200 books, 2000 loans) |
-| `production` | Terhubung ke Gate System & SLiMS API |
+| dummy | Menggunakan data dummy (1000 visitors, 200 books, 2000 loans) |
+| production | Terhubung ke Gate System dan SLiMS API |
 
 Default mode adalah `dummy` untuk development dan demo.
 
 ---
 
+## Rencana Pengembangan
+
+### Phase 1 (Current)
+- Prototype dengan data dummy
+- Visualisasi dasar
+- Dark mode support
+
+### Phase 2 (Planned)
+- Integrasi Gate System API
+- Integrasi SLiMS API
+- Real-time data sync
+
+### Phase 3 (Future)
+- Role-based access control
+- Report generation
+- Email notifications
+
+---
+
 ## Author
 
-**Alvah Rabbany** - *Proyek Magang - Prototype Dashboard Analytics Perpustakaan*
+**Alvah Rabbany** - Proyek Magang - Prototype Dashboard Analytics Perpustakaan
 
 ---
 

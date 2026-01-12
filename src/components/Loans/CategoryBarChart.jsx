@@ -35,7 +35,7 @@ function CategoryBarChart({ data, loading = false, title = "Kategori Buku Paling
     return (
       <div className="card">
         <h3 className="card-header">{title}</h3>
-        <div className="h-64 bg-gray-100 rounded animate-pulse"></div>
+        <div className="h-64 bg-gray-100 dark:bg-dark-700 rounded animate-pulse"></div>
       </div>
     );
   }

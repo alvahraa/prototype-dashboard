@@ -53,7 +53,7 @@ function PeakHoursHeatmap({ data, loading = false, title = "Distribusi Jam Kunju
     return (
       <div className="card">
         <h3 className="card-header">{title}</h3>
-        <div className="h-64 bg-gray-100 rounded animate-pulse"></div>
+        <div className="h-64 bg-gray-100 dark:bg-dark-700 rounded animate-pulse"></div>
       </div>
     );
   }
@@ -75,9 +75,9 @@ function PeakHoursHeatmap({ data, loading = false, title = "Distribusi Jam Kunju
       <div className="flex items-center justify-between mb-4">
         <h3 className="card-header mb-0">{title}</h3>
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-text-secondary">Jam Sibuk:</span>
+          <span className="text-text-secondary dark:text-slate-400">Jam Sibuk:</span>
           {peakHours.slice(0, 3).map(hour => (
-            <span key={hour} className="px-2 py-1 bg-black text-white rounded text-xs font-medium">
+            <span key={hour} className="px-2 py-1 bg-gray-900 dark:bg-indigo-600 text-slate-100 rounded text-xs font-medium">
               {hour}
             </span>
           ))}
@@ -134,8 +134,8 @@ function PeakHoursHeatmap({ data, loading = false, title = "Distribusi Jam Kunju
       </div>
 
       {/* Gradient Legend */}
-      <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-text-secondary">
+      <div className="mt-4 pt-4 border-t border-border dark:border-dark-border-accent flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs text-text-secondary dark:text-slate-400">
           <span>Rendah</span>
           <div className="w-24 h-3 rounded" 
             style={{ background: 'linear-gradient(to right, #e0e0e0, #000000)' }}
@@ -143,8 +143,8 @@ function PeakHoursHeatmap({ data, loading = false, title = "Distribusi Jam Kunju
           <span>Tinggi</span>
         </div>
         <div className="text-sm">
-          <span className="text-text-secondary">Rata-rata: </span>
-          <span className="font-semibold">{Math.round(avgVisits)} pengunjung/jam</span>
+          <span className="text-text-secondary dark:text-slate-400">Rata-rata: </span>
+          <span className="font-semibold dark:text-slate-200">{Math.round(avgVisits)} pengunjung/jam</span>
         </div>
       </div>
     </div>

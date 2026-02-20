@@ -22,7 +22,13 @@ if (process.env.NODE_ENV === 'production') {
 let db = null;
 
 async function initDatabase() {
-    const SQL = await initSqlJs();
+    // In production (Vercel), usually WASM file locator fails.
+    // We point it to a public CDN for stability.
+    const sqlJsConfig = process.env.NODE_ENV === 'production'
+        ? { locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${file}` }
+        : {};
+
+    const SQL = await initSqlJs(sqlJsConfig);
 
     // In production (Vercel), log the path we are using
     if (process.env.NODE_ENV === 'production') {

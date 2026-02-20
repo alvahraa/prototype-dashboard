@@ -3,7 +3,12 @@
  * Uses sql.js (pure JavaScript SQLite)
  */
 
-const initSqlJs = require('sql.js');
+// Use pure JS (ASM) version in production (Vercel) to avoid WASM file issues
+// WASM version is faster but requires binary file access which fails on serverless
+const initSqlJs = process.env.NODE_ENV === 'production'
+    ? require('sql.js/dist/sql-asm.js')
+    : require('sql.js');
+
 const path = require('path');
 const fs = require('fs');
 
@@ -22,13 +27,7 @@ if (process.env.NODE_ENV === 'production') {
 let db = null;
 
 async function initDatabase() {
-    // In production (Vercel), usually WASM file locator fails.
-    // We point it to a public CDN for stability.
-    const sqlJsConfig = process.env.NODE_ENV === 'production'
-        ? { locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${file}` }
-        : {};
-
-    const SQL = await initSqlJs(sqlJsConfig);
+    const SQL = await initSqlJs();
 
     // In production (Vercel), log the path we are using
     if (process.env.NODE_ENV === 'production') {

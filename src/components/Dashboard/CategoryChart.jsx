@@ -51,7 +51,15 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 // Grayscale palette
-const COLORS = ['#111827', '#1f2937', '#374151', '#4b5563', '#6b7280', '#9ca3af'];
+// Premium palette
+const COLORS = [
+  '#6366f1', // Indigo 500
+  '#ec4899', // Pink 500
+  '#10b981', // Emerald 500
+  '#f59e0b', // Amber 500
+  '#8b5cf6', // Violet 500
+  '#06b6d4', // Cyan 500
+];
 
 function CategoryChart({ data, loading = false, title = "Peminjaman per Kategori" }) {
   const chartData = [...(data || [])].sort((a, b) => b.count - a.count);
@@ -70,10 +78,9 @@ function CategoryChart({ data, loading = false, title = "Peminjaman per Kategori
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      whileHover={{ y: -2, transition: { duration: 0.2 } }}
-      className="bg-white dark:bg-dark-800 rounded-2xl p-6 border border-gray-100 dark:border-dark-border-accent shadow-sm hover:shadow-md dark:shadow-dark-sm transition-shadow duration-300"
+      className="card hover:shadow-lg transition-shadow duration-300"
     >
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100 mb-4">{title}</h3>
+      <h3 className="card-header">{title}</h3>
       
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">

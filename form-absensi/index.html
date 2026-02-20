@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0d1017">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <title>Form Absensi - Perpustakaan UNISSULA</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Tailwind Config - Match Dashboard Theme -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            bg: '#0d1017',
+                            card: '#161b26',
+                            'card-hover': '#1c2333',
+                            border: 'rgba(148, 163, 184, 0.08)',
+                            'border-accent': 'rgba(148, 163, 184, 0.12)',
+                        }
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(16px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        html,
+        body {
+            overscroll-behavior: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: #0d1017;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        .card-gradient {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 100%), #161b26;
+        }
+
+        .input-focus:focus {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .radio-card input:checked+.radio-content {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Hide scrollbar */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Select dropdown arrow */
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+        }
+
+        /* Larger touch targets for mobile */
+        input,
+        select,
+        button {
+            min-height: 48px;
+            font-size: 16px !important;
+            /* Prevents iOS zoom */
+        }
+
+        /* Active state for touch feedback */
+        .radio-content:active {
+            transform: scale(0.98);
+        }
+
+        button:active {
+            transform: scale(0.98) !important;
+        }
+    </style>
+</head>
+
+
+<body class="min-h-screen font-sans">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6">
+
+        <!-- Header -->
+        <header class="text-center mb-6 animate-fade-in">
+            <div class="flex flex-col items-center gap-3 mb-3">
+                <img src="logo-unisula.jpeg" alt="Perpustakaan UNISSULA" class="h-16 w-auto object-contain"
+                    onerror="this.style.display='none'">
+            </div>
+            <p class="text-slate-400 text-sm mt-1">Form Absensi Kunjungan</p>
+        </header>
+
+        <!-- Tab Switcher -->
+        <div
+            class="w-full max-w-md mb-4 flex bg-[#161b26] rounded-xl border border-[rgba(148,163,184,0.08)] p-1 animate-fade-in">
+            <button id="tabAbsensi" onclick="switchTab('absensi')"
+                class="flex-1 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 bg-indigo-600 text-white">
+                Absensi
+            </button>
+            <button id="tabReturn" onclick="switchTab('return')"
+                class="flex-1 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 text-slate-400 hover:text-slate-300">
+                Kembalikan Kunci
+            </button>
+        </div>
+
+        <!-- Form Card -->
+        <main id="formCard"
+            class="w-full max-w-md card-gradient rounded-2xl border border-[rgba(148,163,184,0.08)] p-6 sm:p-7 animate-slide-up">
+
+            <form id="absensiForm" class="space-y-5">
+
+                <!-- Ruangan (Touch Friendly) -->
+                <div class="space-y-3">
+                    <label class="text-sm font-medium text-slate-300">Pilih Ruangan</label>
+                    <input type="hidden" id="ruangan" name="ruangan" required>
+
+                    <div class="grid grid-cols-2 gap-3" id="roomGrid">
+                        <!-- Rooms will be generated by script.js for better control -->
+                        <!-- Audiovisual -->
+                        <label class="room-checkbox cursor-pointer group relative">
+                            <input type="checkbox" name="ruangan[]" value="audiovisual" class="peer sr-only">
+                            <div
+                                class="flex flex-col items-center justify-center p-4 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl transition-all duration-200 peer-checked:border-indigo-500 peer-checked:bg-indigo-500/10 hover:border-indigo-500/50 active:scale-95">
+                                <div
+                                    class="mb-2 p-2 rounded-lg bg-indigo-500/10 text-indigo-400 peer-checked:bg-indigo-500/20 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-medium text-slate-300 text-center">Audiovisual</span>
+                            </div>
+                            <div
+                                class="absolute top-2 right-2 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-all duration-200 transform scale-50 peer-checked:scale-100 shadow-sm">
+                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </label>
+
+                        <!-- Ruang Referensi -->
+                        <label class="room-checkbox cursor-pointer group relative">
+                            <input type="checkbox" name="ruangan[]" value="referensi" class="peer sr-only">
+                            <div
+                                class="flex flex-col items-center justify-center p-4 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl transition-all duration-200 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 hover:border-emerald-500/50 active:scale-95">
+                                <div
+                                    class="mb-2 p-2 rounded-lg bg-emerald-500/10 text-emerald-400 peer-checked:bg-emerald-500/20 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-medium text-slate-300 text-center">Referensi</span>
+                            </div>
+                            <div
+                                class="absolute top-2 right-2 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-all duration-200 transform scale-50 peer-checked:scale-100 shadow-sm">
+                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </label>
+
+                        <!-- Sirkulasi L1 -->
+                        <label class="room-checkbox cursor-pointer group relative">
+                            <input type="checkbox" name="ruangan[]" value="sirkulasi_l1" class="peer sr-only">
+                            <div
+                                class="flex flex-col items-center justify-center p-4 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl transition-all duration-200 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 hover:border-blue-500/50 active:scale-95">
+                                <div
+                                    class="mb-2 p-2 rounded-lg bg-blue-500/10 text-blue-400 peer-checked:bg-blue-500/20 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-medium text-slate-300 text-center">Baca Lt. 1</span>
+                            </div>
+                            <div
+                                class="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-all duration-200 transform scale-50 peer-checked:scale-100 shadow-sm">
+                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </label>
+
+                        <!-- Sirkulasi L2 -->
+                        <label class="room-checkbox cursor-pointer group relative">
+                            <input type="checkbox" name="ruangan[]" value="sirkulasi_l2" class="peer sr-only">
+                            <div
+                                class="flex flex-col items-center justify-center p-4 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl transition-all duration-200 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 hover:border-blue-500/50 active:scale-95">
+                                <div
+                                    class="mb-2 p-2 rounded-lg bg-blue-500/10 text-blue-400 peer-checked:bg-blue-500/20 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-medium text-slate-300 text-center">Baca Lt. 2</span>
+                            </div>
+                            <div
+                                class="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-all duration-200 transform scale-50 peer-checked:scale-100 shadow-sm">
+                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </label>
+
+                        <!-- Sirkulasi L3 -->
+                        <label class="room-checkbox cursor-pointer group relative">
+                            <input type="checkbox" name="ruangan[]" value="sirkulasi_l3" class="peer sr-only">
+                            <div
+                                class="flex flex-col items-center justify-center p-4 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl transition-all duration-200 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 hover:border-blue-500/50 active:scale-95">
+                                <div
+                                    class="mb-2 p-2 rounded-lg bg-blue-500/10 text-blue-400 peer-checked:bg-blue-500/20 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-medium text-slate-300 text-center">Baca Lt. 3</span>
+                            </div>
+                            <div
+                                class="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-all duration-200 transform scale-50 peer-checked:scale-100 shadow-sm">
+                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </label>
+
+                        <!-- Karel -->
+                        <label class="room-checkbox cursor-pointer group relative">
+                            <input type="checkbox" name="ruangan[]" value="karel" class="peer sr-only">
+                            <div
+                                class="flex flex-col items-center justify-center p-4 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl transition-all duration-200 peer-checked:border-purple-500 peer-checked:bg-purple-500/10 hover:border-purple-500/50 active:scale-95">
+                                <div
+                                    class="mb-2 p-2 rounded-lg bg-purple-500/10 text-purple-400 peer-checked:bg-purple-500/20 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-medium text-slate-300 text-center">Karel</span>
+                            </div>
+                            <div
+                                class="absolute top-2 right-2 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-all duration-200 transform scale-50 peer-checked:scale-100 shadow-sm">
+                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </label>
+
+                        <!-- SmartLab -->
+                        <label class="room-checkbox cursor-pointer group relative">
+                            <input type="checkbox" name="ruangan[]" value="smartlab" class="peer sr-only">
+                            <div
+                                class="flex flex-col items-center justify-center p-4 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl transition-all duration-200 peer-checked:border-cyan-500 peer-checked:bg-cyan-500/10 hover:border-cyan-500/50 active:scale-95">
+                                <div
+                                    class="mb-2 p-2 rounded-lg bg-cyan-500/10 text-cyan-400 peer-checked:bg-cyan-500/20 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-medium text-slate-300 text-center">SmartLab</span>
+                            </div>
+                            <div
+                                class="absolute top-2 right-2 w-5 h-5 bg-cyan-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-all duration-200 transform scale-50 peer-checked:scale-100 shadow-sm">
+                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </label>
+
+                        <!-- BI Corner -->
+                        <label class="room-checkbox cursor-pointer group relative">
+                            <input type="checkbox" name="ruangan[]" value="bicorner" class="peer sr-only">
+                            <div
+                                class="flex flex-col items-center justify-center p-4 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl transition-all duration-200 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 hover:border-amber-500/50 active:scale-95">
+                                <div
+                                    class="mb-2 p-2 rounded-lg bg-amber-500/10 text-amber-400 peer-checked:bg-amber-500/20 transition-colors">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-medium text-slate-300 text-center">BI Corner</span>
+                            </div>
+                            <div
+                                class="absolute top-2 right-2 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-all duration-200 transform scale-50 peer-checked:scale-100 shadow-sm">
+                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Locker Selection -->
+                    <div class="pt-2 border-t border-[rgba(148,163,184,0.08)]">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="useLocker" onchange="toggleLockerInput()" class="peer sr-only">
+                            <div
+                                class="w-5 h-5 rounded border border-slate-600 peer-checked:bg-indigo-500 peer-checked:border-indigo-500 flex items-center justify-center transition-colors peer-checked:[&>svg]:opacity-100">
+                                <svg class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span
+                                class="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">Pinjam
+                                Kunci Loker?</span>
+                        </label>
+
+                        <div id="lockerInputContainer" class="hidden mt-3 animate-fade-in">
+                            <label class="text-xs font-medium text-slate-500 mb-1 block">Nomor Loker</label>
+                            <input type="number" id="locker_number" name="locker_number"
+                                placeholder="Masukkan nomor loker (1-163)" min="1" max="163"
+                                class="w-full px-4 py-3 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl text-slate-100 text-sm placeholder:text-slate-500 focus:outline-none input-focus transition-all duration-200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NIM -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-300">NIM</label>
+                    <input type="text" id="nim" name="nim" placeholder="Contoh: 30402100123" pattern="[0-9]{10,12}"
+                        maxlength="12" required
+                        class="w-full px-4 py-3 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl 
+                               text-slate-100 text-sm placeholder:text-slate-500 focus:outline-none input-focus transition-all duration-200">
+                    <p class="text-xs text-slate-500 ml-1">10-12 digit angka</p>
+                </div>
+
+                <!-- Nama -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-300">Nama Lengkap</label>
+                    <input type="text" id="nama" name="nama" placeholder="Masukkan nama lengkap" required
+                        class="w-full px-4 py-3 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl 
+                               text-slate-100 text-sm placeholder:text-slate-500 focus:outline-none input-focus transition-all duration-200">
+                </div>
+
+                <!-- Jurusan -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-300">Program Studi</label>
+                    <select id="jurusan" name="jurusan" required class="w-full px-4 py-3 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl 
+                               text-slate-100 text-sm focus:outline-none input-focus transition-all duration-200
+                               appearance-none cursor-pointer pr-10">
+                        <option value="" class="text-slate-400">Pilih program studi...</option>
+                        <optgroup label="Fakultas Kedokteran">
+                            <option value="S1 Kedokteran Umum">S1 Kedokteran Umum</option>
+                            <option value="S2 Biomedik">S2 Biomedik</option>
+                            <option value="S3 Biomedik">S3 Biomedik</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Kedokteran Gigi">
+                            <option value="S1 Kedokteran Gigi">S1 Kedokteran Gigi</option>
+                            <option value="S2 Kedokteran Gigi">S2 Kedokteran Gigi</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Teknik">
+                            <option value="S1 Teknik Sipil">S1 Teknik Sipil</option>
+                            <option value="S2 Teknik Sipil">S2 Teknik Sipil</option>
+                            <option value="S3 Teknik Sipil">S3 Teknik Sipil</option>
+                            <option value="S1 Planologi">S1 Planologi</option>
+                            <option value="S2 Planologi">S2 Planologi</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Hukum">
+                            <option value="S1 Ilmu Hukum">S1 Ilmu Hukum</option>
+                            <option value="S2 Ilmu Hukum">S2 Ilmu Hukum</option>
+                            <option value="S2 Kenotariatan">S2 Kenotariatan</option>
+                            <option value="S3 Doktor Ilmu Hukum">S3 Doktor Ilmu Hukum</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Ekonomi">
+                            <option value="D3 Akuntansi">D3 Akuntansi</option>
+                            <option value="S1 Akuntansi">S1 Akuntansi</option>
+                            <option value="S2 Akuntansi">S2 Akuntansi</option>
+                            <option value="S1 Manajemen">S1 Manajemen</option>
+                            <option value="S2 Manajemen">S2 Manajemen</option>
+                            <option value="S3 Manajemen">S3 Manajemen</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Agama Islam">
+                            <option value="S1 Hukum Keluarga">S1 Hukum Keluarga</option>
+                            <option value="S1 Pendidikan Agama Islam">S1 Pendidikan Agama Islam</option>
+                            <option value="S2 Pendidikan Agama Islam">S2 Pendidikan Agama Islam</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Teknologi Industri">
+                            <option value="S1 Teknik Industri">S1 Teknik Industri</option>
+                            <option value="S1 Teknik Informatika">S1 Teknik Informatika</option>
+                            <option value="S1 Teknik Elektro">S1 Teknik Elektro</option>
+                            <option value="S2 Teknik Elektro">S2 Teknik Elektro</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Psikologi">
+                            <option value="S1 Psikologi">S1 Psikologi</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Ilmu Keperawatan">
+                            <option value="D3 Keperawatan">D3 Keperawatan</option>
+                            <option value="S1 Keperawatan">S1 Keperawatan</option>
+                            <option value="S2 Keperawatan">S2 Keperawatan</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Ilmu Komunikasi">
+                            <option value="S1 Ilmu Komunikasi">S1 Ilmu Komunikasi</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Bahasa, Sastra dan Budaya">
+                            <option value="S1 Pendidikan Bahasa Inggris">S1 Pendidikan Bahasa Inggris</option>
+                            <option value="S1 Sastra Inggris">S1 Sastra Inggris</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Keguruan dan Ilmu Pendidikan">
+                            <option value="S1 Pendidikan Matematika">S1 Pendidikan Matematika</option>
+                            <option value="S2 Matematika">S2 Matematika</option>
+                            <option value="S1 PBSI">S1 PBSI</option>
+                            <option value="S2 PBSI">S2 PBSI</option>
+                            <option value="S1 PGSD">S1 PGSD</option>
+                            <option value="S2 PGSD">S2 PGSD</option>
+                        </optgroup>
+                        <optgroup label="Fakultas Farmasi">
+                            <option value="S1 Farmasi">S1 Farmasi</option>
+                            <option value="S1 Kebidanan">S1 Kebidanan</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- Jenis Kelamin -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-300">Jenis Kelamin</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="radio-card cursor-pointer">
+                            <input type="radio" name="gender" value="L" required class="sr-only">
+                            <div
+                                class="radio-content flex items-center justify-center gap-2 px-4 py-3 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl transition-all duration-200 hover:border-[rgba(148,163,184,0.2)]">
+                                <span class="text-sm font-medium text-slate-300">Laki-laki</span>
+                            </div>
+                        </label>
+                        <label class="radio-card cursor-pointer">
+                            <input type="radio" name="gender" value="P" required class="sr-only">
+                            <div
+                                class="radio-content flex items-center justify-center gap-2 px-4 py-3 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl transition-all duration-200 hover:border-[rgba(148,163,184,0.2)]">
+                                <span class="text-sm font-medium text-slate-300">Perempuan</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Umur -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-300">Umur</label>
+                    <input type="number" id="umur" name="umur" placeholder="Contoh: 21" min="15" max="60" required
+                        class="w-full px-4 py-3 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl 
+                               text-slate-100 text-sm placeholder:text-slate-500 focus:outline-none input-focus transition-all duration-200">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" class="w-full py-3.5 mt-2 bg-indigo-600 hover:bg-indigo-500 text-slate-100 font-medium text-sm rounded-xl 
+                           transition-all duration-200 flex items-center justify-center gap-2
+                           hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+                    <span id="btnText">Kirim Absensi</span>
+                    <svg id="btnLoader" class="hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                </button>
+
+            </form>
+        </main>
+
+        <!-- Success Card -->
+        <main id="successCard"
+            class="hidden w-full max-w-md card-gradient rounded-2xl border border-[rgba(148,163,184,0.08)] p-8 text-center animate-slide-up">
+            <div class="w-16 h-16 mx-auto mb-5 bg-emerald-500/10 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h2 class="text-xl font-semibold text-slate-100 mb-2">Absensi Berhasil</h2>
+            <p class="text-slate-400 text-sm mb-4">Data kunjungan Anda telah tercatat</p>
+            <div id="successDetail"
+                class="text-sm bg-[#0d1017] rounded-xl p-4 mb-5 border border-[rgba(148,163,184,0.08)]"></div>
+            <button onclick="resetForm()" class="px-5 py-2.5 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] hover:border-[rgba(148,163,184,0.2)] 
+                       text-slate-300 text-sm font-medium rounded-xl transition-all duration-200">
+                Isi Absensi Baru
+            </button>
+        </main>
+
+        <!-- Return Locker Card -->
+        <main id="returnCard"
+            class="hidden w-full max-w-md card-gradient rounded-2xl border border-[rgba(148,163,184,0.08)] p-6 sm:p-7 animate-slide-up">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 mx-auto mb-3 bg-amber-500/10 rounded-full flex items-center justify-center">
+                    <svg class="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-slate-100">Kembalikan Kunci Loker</h3>
+                <p class="text-slate-400 text-xs mt-1">Masukkan nomor loker yang ingin dikembalikan</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-300">Nomor Loker</label>
+                    <input type="number" id="returnLockerNumber" placeholder="Contoh: 42" min="1" max="163"
+                        class="w-full px-4 py-3 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl text-slate-100 placeholder:text-slate-500 focus:outline-none input-focus transition-all duration-200 text-center text-2xl font-bold tracking-widest">
+                </div>
+
+                <button onclick="handleReturnLocker()" id="returnBtn"
+                    class="w-full py-3.5 bg-amber-600 hover:bg-amber-500 text-slate-100 font-medium text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+                    <span id="returnBtnText">Kembalikan Kunci</span>
+                    <svg id="returnBtnLoader" class="hidden w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Return Result (shown after success) -->
+            <div id="returnResult"
+                class="hidden mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-fade-in">
+                <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-emerald-400 font-semibold text-sm">Berhasil Dikembalikan</span>
+                </div>
+                <div id="returnResultDetail" class="text-slate-300 text-sm"></div>
+            </div>
+
+            <!-- Return Error -->
+            <div id="returnError"
+                class="hidden mt-4 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl animate-fade-in">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span id="returnErrorText" class="text-rose-400 text-sm"></span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-6 text-center text-slate-500 text-xs">
+            Perpustakaan UNISSULA
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

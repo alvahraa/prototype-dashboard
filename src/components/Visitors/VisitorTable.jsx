@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { format, parseISO, differenceInMinutes } from 'date-fns';
-import { ChevronUp, ChevronDown, Search, Download } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search } from 'lucide-react';
 import { exportToExcel } from '../../utils/exportToExcel';
+import { ExportButton } from '../Common';
 
 /**
  * VisitorTable Component
@@ -41,7 +42,7 @@ function VisitorTable({ visitors, loading = false, title = "Log Pengunjung Terba
     const entry = parseISO(entryTime);
     const exit = status === 'inside' ? now : (exitTime ? parseISO(exitTime) : now);
     const minutes = differenceInMinutes(exit, entry);
-    
+
     if (minutes < 60) {
       return `${minutes} menit`;
     }
@@ -59,8 +60,8 @@ function VisitorTable({ visitors, loading = false, title = "Log Pengunjung Terba
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(v => 
-        v.name.toLowerCase().includes(query) ||
+      filtered = filtered.filter(v =>
+        v.nama.toLowerCase().includes(query) ||
         v.nim.includes(query) ||
         v.faculty.toLowerCase().includes(query)
       );
@@ -70,7 +71,7 @@ function VisitorTable({ visitors, loading = false, title = "Log Pengunjung Terba
     filtered.sort((a, b) => {
       let aVal = a[sortConfig.key];
       let bVal = b[sortConfig.key];
-      
+
       // Handle date comparison
       if (sortConfig.key === 'entryTime') {
         aVal = new Date(aVal).getTime();
@@ -88,14 +89,14 @@ function VisitorTable({ visitors, loading = false, title = "Log Pengunjung Terba
 
   // Column header component
   const SortableHeader = ({ label, sortKey }) => (
-    <th 
+    <th
       onClick={() => handleSort(sortKey)}
       className="px-4 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 select-none"
     >
       <div className="flex items-center gap-1">
         {label}
         {sortConfig.key === sortKey && (
-          sortConfig.direction === 'asc' 
+          sortConfig.direction === 'asc'
             ? <ChevronUp className="w-4 h-4" />
             : <ChevronDown className="w-4 h-4" />
         )}
@@ -120,7 +121,7 @@ function VisitorTable({ visitors, loading = false, title = "Log Pengunjung Terba
     <div className="card">
       <div className="flex items-center justify-between mb-4">
         <h3 className="card-header mb-0">{title}</h3>
-        
+
         {/* Search + Export */}
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -133,10 +134,10 @@ function VisitorTable({ visitors, loading = false, title = "Log Pengunjung Terba
               className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm w-48 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             />
           </div>
-          <button 
-            onClick={() => {
+          <ExportButton
+            onExport={() => {
               const data = processedData.map(v => ({
-                'Nama': v.name,
+                'Nama': v.nama,
                 'NIM': v.nim,
                 'Fakultas': v.faculty,
                 'Jam Masuk': format(parseISO(v.entryTime), 'HH:mm'),
@@ -144,11 +145,8 @@ function VisitorTable({ visitors, loading = false, title = "Log Pengunjung Terba
               }));
               exportToExcel(data, 'Visitor_Log', 'Visitors');
             }}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export</span>
-          </button>
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-dark-700 dark:hover:bg-dark-600 dark:text-slate-200"
+          />
         </div>
       </div>
 
@@ -156,7 +154,7 @@ function VisitorTable({ visitors, loading = false, title = "Log Pengunjung Terba
         <table className="table">
           <thead className="sticky top-0 bg-gray-50 z-10">
             <tr>
-              <SortableHeader label="Nama" sortKey="name" />
+              <SortableHeader label="Nama" sortKey="nama" />
               <th className="px-4 py-3 text-left font-semibold text-gray-700">NIM</th>
               <SortableHeader label="Fakultas" sortKey="faculty" />
               <SortableHeader label="Jam Masuk" sortKey="entryTime" />
@@ -173,12 +171,12 @@ function VisitorTable({ visitors, loading = false, title = "Log Pengunjung Terba
               </tr>
             ) : (
               processedData.map((visitor, index) => (
-                <tr 
-                  key={visitor.id} 
+                <tr
+                  key={visitor.id}
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 20}ms` }}
                 >
-                  <td className="px-4 py-3 font-medium">{visitor.name}</td>
+                  <td className="px-4 py-3 font-medium">{visitor.nama}</td>
                   <td className="px-4 py-3 text-text-secondary font-mono text-xs">
                     {visitor.nim}
                   </td>
@@ -194,9 +192,8 @@ function VisitorTable({ visitors, loading = false, title = "Log Pengunjung Terba
                     {getDuration(visitor.entryTime, visitor.exitTime, visitor.status)}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`chip ${
-                      visitor.status === 'inside' ? 'chip-success' : 'chip-neutral'
-                    }`}>
+                    <span className={`chip ${visitor.status === 'inside' ? 'chip-success' : 'chip-neutral'
+                      }`}>
                       {visitor.status === 'inside' ? 'Di Dalam' : 'Keluar'}
                     </span>
                   </td>

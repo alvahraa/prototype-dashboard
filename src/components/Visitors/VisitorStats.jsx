@@ -12,7 +12,7 @@ import { Clock, TrendingUp, Calendar } from 'lucide-react';
 
 function StatCard({ icon: Icon, label, value, subValue, color = 'black' }) {
   return (
-    <div className="card flex items-center gap-4">
+    <div className="card flex items-center gap-4 h-full">
       <div className={`w-12 h-12 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-dark-700`}>
         <Icon className="w-6 h-6 text-gray-900 dark:text-slate-300" />
       </div>
@@ -27,16 +27,16 @@ function StatCard({ icon: Icon, label, value, subValue, color = 'black' }) {
   );
 }
 
-function VisitorStats({ 
-  durationStats, 
-  peakHours, 
+function VisitorStats({
+  durationStats,
+  peakHours,
   totalMonthVisits,
-  loading = false 
+  loading = false
 }) {
   // Find the peak hour
-  const peakHour = peakHours?.reduce((max, h) => 
+  const peakHour = peakHours?.reduce((max, h) =>
     h.visits > (max?.visits || 0) ? h : max
-  , null);
+    , null);
 
   // Count peak hours
   const peakHoursCount = peakHours?.filter(h => h.isPeak).length || 0;
@@ -60,21 +60,14 @@ function VisitorStats({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <StatCard
-        icon={Clock}
-        label="Rata-rata Durasi Kunjungan"
-        value={durationStats?.formattedAverage || '0 menit'}
-        subValue={`Median: ${durationStats?.formattedMedian || '0 menit'}`}
-      />
-      
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
       <StatCard
         icon={TrendingUp}
         label="Jam Tersibuk"
         value={peakHour?.hour || '-'}
         subValue={`${peakHour?.visits || 0} pengunjung • ${peakHoursCount} jam peak`}
       />
-      
+
       <StatCard
         icon={Calendar}
         label="Total Kunjungan (30 Hari)"

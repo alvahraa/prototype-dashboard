@@ -1,30 +1,68 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Users, 
-  BookOpen, 
+import {
+  LayoutDashboard,
+  Users,
+  Monitor,
+  BookOpen,
+  ArrowRightLeft,
+  Keyboard,
+  Cpu,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Layers,
+  Lock,
   LogOut,
-  User
+  Clock
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import logoWhite from '../../assets/logo-unisula.jpeg';
 
 /**
- * Sidebar Navigation Component - Framer Motion Enhanced
+ * Sidebar Navigation Component - Grouped & Collapsible
  * 
  * Features:
- * - Staggered entry animations
- * - layoutId for smooth active indicator transitions
- * - whileHover & whileTap micro-interactions
+ * - Collapsible "Ruangan" group to save space
+ * - Clean layout with better spacing
+ * - Auto-expand group if active item is inside
+ * - Light/Dark Mode Support
  */
 
-const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'visitors', label: 'Kunjungan', icon: Users },
-  { id: 'loans', label: 'Peminjaman', icon: BookOpen },
+const menuGroups = [
+  {
+    title: 'Main',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'visitors', label: 'Analisis Kunjungan', icon: Users },
+    ]
+  },
+  {
+    title: 'Fasilitas',
+    id: 'rooms_group',
+    icon: Layers,
+    label: 'Ruangan & Fasilitas',
+    isGroup: true,
+    items: [
+      { id: 'audiovisual', label: 'Audiovisual', icon: Monitor },
+      { id: 'referensi', label: 'Ruang Referensi', icon: BookOpen },
+      { id: 'sirkulasi', label: 'Ruangan Baca', icon: ArrowRightLeft },
+      { id: 'karel', label: 'Ruang Karel', icon: Keyboard },
+      { id: 'smartlab', label: 'SmartLab', icon: Cpu },
+      { id: 'bicorner', label: 'BI Corner', icon: BookOpen },
+      { id: 'locker', label: 'Monitor Loker', icon: Lock },
+    ]
+  },
+  {
+    title: 'System',
+    items: [
+      { id: 'operating-hours', label: 'Jam Operasional', icon: Clock },
+      { id: 'admin', label: 'Admin', icon: Layers },
+    ]
+  }
 ];
 
-// Smooth, luxurious spring transition config
+// Smooth transition config
 const smoothSpring = {
   type: 'spring',
   stiffness: 100,
@@ -32,151 +70,197 @@ const smoothSpring = {
   mass: 1.2,
 };
 
-// Animation variants
 const sidebarVariants = {
   hidden: { x: -20, opacity: 0 },
   visible: {
     x: 0,
     opacity: 1,
-    transition: {
-      ...smoothSpring,
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
-    },
+    transition: { ...smoothSpring, staggerChildren: 0.1 }
   },
 };
 
 const itemVariants = {
-  hidden: { x: -15, opacity: 0 },
-  visible: {
-    x: 0,
-    opacity: 1,
-    transition: smoothSpring,
-  },
+  hidden: { x: -10, opacity: 0 },
+  visible: { x: 0, opacity: 1, transition: smoothSpring },
 };
 
-function Sidebar({ activePage, onNavigate, user, onLogout }) {
+function Sidebar({ activePage, onNavigate, collapsed, onToggle, onLogout, user }) {
+  const [expandedGroups, setExpandedGroups] = useState({ rooms_group: true });
+
+  const toggleGroup = (groupId) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
+  };
+
+  // Check if active page is in a group
+  React.useEffect(() => {
+    menuGroups.forEach(group => {
+      if (group.isGroup) {
+        if (group.items.some(item => item.id === activePage)) {
+          setExpandedGroups(prev => ({ ...prev, [group.id]: true }));
+        }
+      }
+    });
+  }, [activePage]);
+
   return (
     <motion.aside
       initial="hidden"
       animate="visible"
       variants={sidebarVariants}
-      className="fixed left-0 top-0 h-screen w-64 bg-dark-950 text-dark-text-primary flex flex-col z-50"
+      className={cn(
+        "fixed left-0 top-0 h-screen bg-white dark:bg-dark-950 text-gray-900 dark:text-gray-100 flex flex-col z-50 transition-all duration-300 ease-in-out border-r border-gray-200 dark:border-dark-border-accent",
+        collapsed ? "w-20" : "w-64"
+      )}
     >
-      {/* Logo & Title */}
-      <motion.div 
-        variants={itemVariants}
-        className="p-6 border-b border-dark-border-accent"
-      >
-        <div className="flex items-center gap-3">
-          <motion.div 
-            whileHover={{ scale: 1.03, rotate: 2 }}
-            whileTap={{ scale: 0.97 }}
-            transition={smoothSpring}
-            className="w-11 h-11 rounded-xl overflow-hidden shadow-lg"
-          >
-            <img 
-              src="/images/assets/logo.jpg" 
-              alt="Logo" 
-              className="w-full h-full object-cover"
-            />
-          </motion.div>
-          <div>
-            <h1 className="font-bold text-lg leading-tight text-dark-text-primary">Prototype</h1>
-            <p className="text-xs text-dark-text-tertiary">Dashboard Analytics</p>
-          </div>
+      {/* Logo */}
+      <div className="p-5 border-b border-gray-200 dark:border-dark-border-accent flex items-center justify-between h-20">
+        <div className={cn("flex items-center gap-3 overflow-hidden w-full", collapsed ? "justify-center" : "")}>
+          <img
+            src={logoWhite}
+            alt="Logo Perpustakaan"
+            className={cn("object-contain transition-all duration-300", collapsed ? "h-8 w-8" : "h-12 w-auto")}
+          />
         </div>
-      </motion.div>
+      </div>
 
-      {/* Navigation Menu */}
-      <nav className="flex-1 py-4">
-        <ul className="space-y-1 px-3">
-          {menuItems.map((item, index) => {
-            const Icon = item.icon;
-            const isActive = activePage === item.id;
-            
-            return (
-              <motion.li 
-                key={item.id}
-                variants={itemVariants}
-                custom={index}
-              >
-                <motion.button
-                  onClick={() => onNavigate(item.id)}
-                  whileHover={{ x: 3 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={smoothSpring}
-                  className={cn(
-                    'relative w-full flex items-center gap-3 px-4 py-3 rounded-xl',
-                    'transition-colors duration-200 text-left',
-                    isActive 
-                      ? 'text-gray-900 dark:text-slate-50 font-medium' 
-                      : 'text-dark-text-secondary hover:text-dark-text-primary dark:hover:text-slate-200'
-                  )}
-                >
-                  {/* Active Background Pill with layoutId for smooth transitions */}
-                  <AnimatePresence mode="wait">
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeNavBg"
-                        className="absolute inset-0 bg-white dark:bg-gray-700 rounded-xl shadow-sm"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={smoothSpring}
+      {/* Toggle Button */}
+      <button
+        onClick={onToggle}
+        className="absolute -right-3 top-24 w-6 h-6 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white shadow-lg transition-colors z-50"
+      >
+        {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
+      </button>
+
+      {/* Navigation */}
+      <nav className="flex-1 py-6 overflow-y-auto custom-scrollbar px-3 space-y-6">
+        {menuGroups.map((group, groupIdx) => (
+          <div key={groupIdx}>
+            {/* Group Title */}
+            {!collapsed && !group.isGroup && group.title && group.items.length > 0 && (
+              <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 px-3">
+                {group.title}
+              </h4>
+            )}
+
+            <ul className="space-y-1">
+              {/* If it's a Collapsible Group */}
+              {group.isGroup ? (
+                <li>
+                  {/* Group Header */}
+                  <button
+                    onClick={() => collapsed ? null : toggleGroup(group.id)}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
+                      collapsed ? "justify-center" : "justify-between hover:bg-gray-100 dark:hover:bg-dark-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    )}
+                    title={collapsed ? group.label : ''}
+                  >
+                    <div className="flex items-center gap-3">
+                      <group.icon className={cn("w-5 h-5", expandedGroups[group.id] ? "text-indigo-600 dark:text-indigo-400" : "text-gray-500")} />
+                      {!collapsed && <span className="font-medium text-sm">{group.label}</span>}
+                    </div>
+                    {!collapsed && (
+                      <ChevronDown
+                        className={cn("w-4 h-4 transition-transform duration-200", expandedGroups[group.id] ? "rotate-180" : "")}
                       />
                     )}
+                  </button>
+
+                  {/* Group Items */}
+                  <AnimatePresence>
+                    {(expandedGroups[group.id] || collapsed) && (
+                      <motion.ul
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className={cn("overflow-hidden", !collapsed && "pl-4 mt-1 space-y-1")}
+                      >
+                        {group.items.map((item) => {
+                          const isActive = activePage === item.id;
+                          const Icon = item.icon;
+
+                          return (
+                            <li key={item.id}>
+                              <button
+                                onClick={() => onNavigate(item.id)}
+                                className={cn(
+                                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-sm",
+                                  collapsed ? "justify-center py-3 my-1" : "",
+                                  isActive
+                                    ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-600/10 dark:text-indigo-400"
+                                    : "text-gray-600 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-800/50"
+                                )}
+                                title={item.label}
+                              >
+                                <Icon className={cn("w-4 h-4", collapsed && "w-5 h-5")} />
+                                {!collapsed && <span>{item.label}</span>}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </motion.ul>
+                    )}
                   </AnimatePresence>
-                  
-                  <Icon className="relative z-10 w-5 h-5" />
-                  <span className="relative z-10">{item.label}</span>
-                </motion.button>
-              </motion.li>
-            );
-          })}
-        </ul>
+                </li>
+              ) : (
+                // Normal Items
+                group.items.map(item => {
+                  const isActive = activePage === item.id;
+                  const Icon = item.icon;
 
-
+                  return (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => onNavigate(item.id)}
+                        className={cn(
+                          "relative w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
+                          collapsed ? "justify-center" : "",
+                          isActive
+                            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-800"
+                        )}
+                        title={item.label}
+                      >
+                        <Icon className="w-5 h-5" />
+                        {!collapsed && <span className="font-medium text-sm">{item.label}</span>}
+                      </button>
+                    </li>
+                  )
+                })
+              )}
+            </ul>
+          </div>
+        ))}
       </nav>
 
-      {/* User Info & Logout */}
-      <motion.div 
-        variants={itemVariants}
-        className="p-4 border-t border-dark-border-accent"
-      >
-        {user && (
-          <motion.div 
-            className="mb-3"
-            whileHover={{ x: 2 }}
-          >
-            <div className="flex items-center gap-3 px-2 py-2">
-              <div className="w-9 h-9 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate text-dark-text-primary">{user.name || user.username}</p>
-                <p className="text-xs text-dark-text-tertiary truncate">Administrator</p>
-              </div>
+      {/* Footer / User Profile */}
+      <div className="p-4 border-t border-gray-200 dark:border-dark-border-accent space-y-2">
+        <button
+          onClick={onLogout}
+          className={cn(
+            "w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-red-500/80 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-300",
+            collapsed ? "justify-center" : ""
+          )}
+          title="Logout"
+        >
+          <LogOut className="w-5 h-5" />
+          {!collapsed && <span className="font-medium text-sm">Logout</span>}
+        </button>
+
+        <div className={cn("flex items-center gap-3 pt-2 border-t border-gray-200 dark:border-dark-border-accent/50", collapsed ? "justify-center" : "")}>
+          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0" />
+          {!collapsed && (
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user?.username || 'Admin'}</p>
+              <p className="text-xs text-gray-500 truncate">Online</p>
             </div>
-          </motion.div>
-        )}
-        
-        {onLogout && (
-          <motion.button
-            onClick={onLogout}
-            whileHover={{ x: 4, backgroundColor: 'rgba(55, 65, 81, 0.5)' }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-dark-text-tertiary hover:text-dark-text-primary transition-colors duration-200"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="text-sm">Keluar</span>
-          </motion.button>
-        )}
-        
-        <p className="text-xs text-dark-text-muted text-center mt-3">
-          © 2024 Prototype Dashboard
-        </p>
-      </motion.div>
+          )}
+        </div>
+      </div>
+
     </motion.aside>
   );
 }

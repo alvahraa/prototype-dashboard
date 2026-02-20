@@ -36,7 +36,7 @@ function ExportButton({ onExport, label = 'Export', className = '' }) {
         transition-all duration-200
         ${status === 'success' 
           ? 'bg-emerald-500 text-white' 
-          : 'bg-gray-900 hover:bg-gray-800 text-white'
+          : 'bg-gray-900 hover:bg-gray-800 text-white dark:bg-indigo-600 dark:hover:bg-indigo-700'
         }
         disabled:opacity-50 disabled:cursor-not-allowed
         ${className}

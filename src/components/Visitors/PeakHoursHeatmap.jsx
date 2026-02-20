@@ -38,14 +38,12 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-// Get color based on intensity (0-1)
-function getColor(visits, maxVisits) {
-  if (maxVisits === 0) return '#e0e0e0';
+// Get color opacity based on intensity (0-1)
+function getOpacity(visits, maxVisits) {
+  if (maxVisits === 0) return 0.3;
   const intensity = visits / maxVisits;
-  
-  // Gradient from light gray (#e0e0e0) to black (#000000)
-  const gray = Math.round(224 - (intensity * 200));
-  return `rgb(${gray}, ${gray}, ${gray})`;
+  // Min opacity 0.3, Max 1.0
+  return 0.3 + (intensity * 0.7);
 }
 
 function PeakHoursHeatmap({ data, loading = false, title = "Distribusi Jam Kunjungan" }) {
@@ -99,8 +97,8 @@ function PeakHoursHeatmap({ data, loading = false, title = "Distribusi Jam Kunju
               dataKey="hour"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: '#666' }}
-              interval={0}
+              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              interval={1}
               angle={-45}
               textAnchor="end"
               height={50}
@@ -125,7 +123,8 @@ function PeakHoursHeatmap({ data, loading = false, title = "Distribusi Jam Kunju
               {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
-                  fill={getColor(entry.visits, maxVisits)}
+                  fill="#6366f1"
+                  fillOpacity={getOpacity(entry.visits, maxVisits)}
                 />
               ))}
             </Bar>
@@ -138,7 +137,7 @@ function PeakHoursHeatmap({ data, loading = false, title = "Distribusi Jam Kunju
         <div className="flex items-center gap-2 text-xs text-text-secondary dark:text-slate-400">
           <span>Rendah</span>
           <div className="w-24 h-3 rounded" 
-            style={{ background: 'linear-gradient(to right, #e0e0e0, #000000)' }}
+            style={{ background: 'linear-gradient(to right, rgba(99, 102, 241, 0.3), rgba(99, 102, 241, 1))' }}
           ></div>
           <span>Tinggi</span>
         </div>

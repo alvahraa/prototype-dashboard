@@ -11,30 +11,30 @@ function BookCard({ book }) {
   return (
     <div className="card group cursor-pointer hover:shadow-lg transition-all">
       {/* Cover */}
-      <div 
+      <div
         className="w-full h-44 rounded-lg shadow mb-3 flex items-center justify-center text-3xl transition-transform group-hover:scale-[1.02]"
-        style={{ 
+        style={{
           background: `linear-gradient(135deg, #0f3460, #1a365d)`,
         }}
       >
         B
       </div>
-      
+
       {/* Category Tag */}
       <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded mb-2">
         {book.category}
       </span>
-      
+
       {/* Title */}
       <h4 className="font-semibold text-sm line-clamp-2 group-hover:underline mb-1">
         {book.title}
       </h4>
-      
+
       {/* Author */}
       <p className="text-xs text-text-secondary line-clamp-1 mb-2">
         {book.author}
       </p>
-      
+
       {/* Rating */}
       <div className="flex items-center gap-1">
         <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
@@ -44,7 +44,7 @@ function BookCard({ book }) {
   );
 }
 
-function ContentBasedRecs({ 
+function ContentBasedRecs({
   recommendations,
   visitors,
   selectedUserId,
@@ -99,7 +99,7 @@ function ContentBasedRecs({
         >
           {uniqueVisitors.map(visitor => (
             <option key={visitor.nim} value={visitor.nim}>
-              {visitor.name} ({visitor.nim})
+              {visitor.nama} ({visitor.nim})
             </option>
           ))}
         </select>

@@ -8,11 +8,11 @@
  * - Helper Functions (date utilities, calculations)
  */
 
-import { 
-  parseISO, 
-  differenceInMinutes, 
+import {
+  parseISO,
+  differenceInMinutes,
   differenceInDays,
-  format, 
+  format,
   isToday as dateFnsIsToday,
   subDays,
   startOfDay,
@@ -45,10 +45,10 @@ export function formatDuration(minutes) {
   if (minutes == null || isNaN(minutes) || minutes < 0) {
     return '0 menit';
   }
-  
+
   const hours = Math.floor(minutes / 60);
   const mins = Math.round(minutes % 60);
-  
+
   if (hours === 0) {
     return `${mins} menit`;
   } else if (mins === 0) {
@@ -77,19 +77,19 @@ export function average(numbers) {
  */
 export function median(numbers) {
   if (!numbers || numbers.length === 0) return 0;
-  
+
   // Filter dan sort
   const validNumbers = numbers.filter(n => n != null && !isNaN(n));
   if (validNumbers.length === 0) return 0;
-  
+
   const sorted = [...validNumbers].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  
+
   // Jika jumlah genap, ambil rata-rata 2 nilai tengah
   if (sorted.length % 2 === 0) {
     return (sorted[mid - 1] + sorted[mid]) / 2;
   }
-  
+
   return sorted[mid];
 }
 
@@ -100,9 +100,13 @@ export function median(numbers) {
  */
 function safeParse(date) {
   if (!date) return null;
-  if (date instanceof Date) return date;
+  if (date instanceof Date) return isNaN(date.getTime()) ? null : date;
   try {
-    return parseISO(date);
+    // SQLite returns dates as "2026-02-12 14:30:00" (space separator)
+    // date-fns parseISO requires ISO 8601 "2026-02-12T14:30:00" (T separator)
+    const normalized = typeof date === 'string' ? date.replace(' ', 'T') : date;
+    const parsed = parseISO(normalized);
+    return isNaN(parsed.getTime()) ? null : parsed;
   } catch {
     return null;
   }
@@ -137,12 +141,12 @@ export function calculatePeakHours(visitors) {
   // Step 1: Group visitors by entry hour
   // Menggunakan Map untuk O(n) performance
   const hourCounts = new Map();
-  
+
   // Initialize semua jam dengan 0
   for (let h = 0; h < 24; h++) {
     hourCounts.set(h, 0);
   }
-  
+
   // Count visits per hour
   visitors.forEach(visitor => {
     const entryTime = safeParse(visitor.entryTime);
@@ -198,7 +202,7 @@ export function calculateAverageDuration(visitors) {
 
   // Step 1: Filter visitors yang sudah exit dan hitung durasi
   const durations = [];
-  
+
   visitors.forEach(visitor => {
     // Hanya proses yang sudah exit
     if (visitor.status !== 'exited' || !visitor.exitTime || !visitor.entryTime) {
@@ -207,7 +211,7 @@ export function calculateAverageDuration(visitors) {
 
     const entryTime = safeParse(visitor.entryTime);
     const exitTime = safeParse(visitor.exitTime);
-    
+
     if (entryTime && exitTime) {
       const durationMinutes = differenceInMinutes(exitTime, entryTime);
       // Validasi durasi masuk akal (0 - 720 menit / 12 jam)
@@ -257,7 +261,7 @@ export function getFacultyDistribution(visitors) {
 
   // Step 1: Group by faculty menggunakan Map untuk O(n)
   const facultyCounts = new Map();
-  
+
   visitors.forEach(visitor => {
     if (visitor.faculty) {
       const current = facultyCounts.get(visitor.faculty) || 0;
@@ -271,6 +275,48 @@ export function getFacultyDistribution(visitors) {
     faculty,
     count,
     percentage: Math.round((count / total) * 100 * 10) / 10 // 1 decimal place
+  }));
+
+  // Step 3: Sort by count descending
+  result.sort((a, b) => b.count - a.count);
+
+  return result;
+}
+
+/**
+ * Distribusi pengunjung per jurusan/prodi
+ * 
+ * Logic:
+ * 1. Group by jurusan
+ * 2. Count dan hitung percentage
+ * 3. Sort by count descending
+ * 
+ * @param {Array} visitors - Array of visitor objects
+ * @returns {Array} Distribusi per prodi
+ *   Format: [{ prodi: "S1 Teknik Informatika", count: 150, percentage: 15 }, ...]
+ */
+export function getProdiDistribution(visitors) {
+  if (!visitors || visitors.length === 0) {
+    return [];
+  }
+
+  // Step 1: Group by jurusan/prodi
+  const prodiCounts = new Map();
+
+  visitors.forEach(visitor => {
+    const prodi = visitor.jurusan || visitor.prodi;
+    if (prodi) {
+      const current = prodiCounts.get(prodi) || 0;
+      prodiCounts.set(prodi, current + 1);
+    }
+  });
+
+  // Step 2: Convert to array dan calculate percentage
+  const total = visitors.length;
+  const result = Array.from(prodiCounts.entries()).map(([prodi, count]) => ({
+    prodi,
+    count,
+    percentage: Math.round((count / total) * 100 * 10) / 10
   }));
 
   // Step 3: Sort by count descending
@@ -400,7 +446,7 @@ export function getTopBooks(loans, books, limit = 10) {
 
   // Step 4: Sort and limit
   result.sort((a, b) => b.totalLoans - a.totalLoans);
-  
+
   return result.slice(0, limit);
 }
 
@@ -431,7 +477,7 @@ export function getCategoryPopularity(loans, books) {
   // Count loans per category (O(n))
   const categoryCounts = new Map();
   let validLoans = 0;
-  
+
   loans.forEach(loan => {
     const category = bookCategory.get(loan.bookId);
     if (category) {
@@ -478,10 +524,10 @@ export function analyzeLateReturns(loans) {
   }
 
   // Filter dan analisis
-  const returnedLoans = loans.filter(loan => 
+  const returnedLoans = loans.filter(loan =>
     loan.status === 'returned' || loan.status === 'late'
   );
-  
+
   let lateLoans = 0;
   const lateDays = [];
   const lateDistribution = new Map(); // Untuk distribusi per hari
@@ -489,13 +535,13 @@ export function analyzeLateReturns(loans) {
   returnedLoans.forEach(loan => {
     const returnDate = safeParse(loan.returnDate);
     const dueDate = safeParse(loan.dueDate);
-    
+
     if (returnDate && dueDate) {
       if (isAfter(returnDate, dueDate)) {
         lateLoans++;
         const daysLate = differenceInDays(returnDate, dueDate);
         lateDays.push(daysLate);
-        
+
         // Track distribution
         const dayKey = Math.min(daysLate, 7); // Cap at 7+ days
         lateDistribution.set(dayKey, (lateDistribution.get(dayKey) || 0) + 1);
@@ -507,8 +553,8 @@ export function analyzeLateReturns(loans) {
   });
 
   const totalReturned = returnedLoans.length;
-  const lateRate = totalReturned > 0 
-    ? Math.round((lateLoans / totalReturned) * 100 * 10) / 10 
+  const lateRate = totalReturned > 0
+    ? Math.round((lateLoans / totalReturned) * 100 * 10) / 10
     : 0;
 
   // Build late distribution array
@@ -550,7 +596,7 @@ export function getLoanTrend(loans, months = 6) {
   const loanDates = loans
     .map(l => safeParse(l.loanDate))
     .filter(d => d != null);
-  
+
   if (loanDates.length === 0) {
     return [];
   }
@@ -703,7 +749,7 @@ export function getContentBasedRecommendations(userId, loans, books, limit = 5) 
   // Step 2: Find favorite categories
   const categoryCount = new Map();
   const borrowedBookIds = new Set();
-  
+
   userLoans.forEach(loan => {
     borrowedBookIds.add(loan.bookId);
     const book = bookMap.get(loan.bookId);
@@ -723,12 +769,12 @@ export function getContentBasedRecommendations(userId, loans, books, limit = 5) 
 
   // Step 3: Find books from favorite categories that user hasn't borrowed
   const recommendations = [];
-  
+
   // Prioritize by category order (most favorite first)
   sortedCategories.forEach((category, categoryIndex) => {
     books
-      .filter(book => 
-        book.category === category && 
+      .filter(book =>
+        book.category === category &&
         !borrowedBookIds.has(book.id)
       )
       .forEach(book => {
@@ -779,7 +825,7 @@ export function getTrendingBooks(loans, books, daysRange = 7, limit = 10) {
   const loanDates = loans
     .map(l => safeParse(l.loanDate))
     .filter(d => d != null);
-  
+
   if (loanDates.length === 0) {
     return [];
   }
@@ -805,11 +851,12 @@ export function getTrendingBooks(loans, books, daysRange = 7, limit = 10) {
  * Generate summary statistics untuk dashboard overview
  * 
  * @param {Array} visitors - Array of visitor objects
- * @param {Array} books - Array of book objects
- * @param {Array} loans - Array of loan objects
+ * @param {Array} books - Array of book objects (optional)
+ * @param {Array} loans - Array of loan objects (optional)
+ * @param {Array} avVisits - Array of audiovisual visit objects
  * @returns {Object} Summary statistics
  */
-export function getDashboardSummary(visitors, books, loans) {
+export function getDashboardSummary(visitors, books, loans, avVisits = []) {
   // Today's stats (based on latest date in data)
   let todayDate = new Date();
   if (visitors && visitors.length > 0) {
@@ -826,25 +873,62 @@ export function getDashboardSummary(visitors, books, loans) {
 
   const currentlyInside = visitors?.filter(v => v.status === 'inside') || [];
 
-  const activeLoans = loans?.filter(l => l.status === 'active') || [];
+  // Audiovisual visit stats
+  const todayAVVisits = avVisits?.filter(v => {
+    const visitDate = safeParse(v.visitTime);
+    return visitDate && format(visitDate, 'yyyy-MM-dd') === format(todayDate, 'yyyy-MM-dd');
+  }) || [];
 
-  const lateAnalysis = analyzeLateReturns(loans);
   const durationStats = calculateAverageDuration(visitors);
+
+  // Calculate Top Room
+  const roomCounts = new Map();
+  visitors?.forEach(v => {
+    if (v.ruangan) {
+      roomCounts.set(v.ruangan, (roomCounts.get(v.ruangan) || 0) + 1);
+    }
+  });
+
+  let topRoom = { name: '-', count: 0 };
+  if (roomCounts.size > 0) {
+    const sortedRooms = Array.from(roomCounts.entries()).sort((a, b) => b[1] - a[1]);
+    if (sortedRooms.length > 0) {
+      // Map room code to nice name
+      const roomNames = {
+        'audiovisual': 'Audiovisual',
+        'referensi': 'Referensi',
+        'sirkulasi_l1': 'Sirkulasi L1',
+        'sirkulasi_l2': 'Sirkulasi L2',
+        'karel': 'Ruang Karel',
+        'smartlab': 'Smart Lab'
+      };
+
+      const [code, count] = sortedRooms[0];
+      topRoom = {
+        name: roomNames[code] || code,
+        count
+      };
+    }
+  }
+
+  // Calculate Busiest Hour
+  const peakHours = calculatePeakHours(visitors);
+  const busiestHourObj = peakHours.reduce((prev, current) =>
+    (prev.visits > current.visits) ? prev : current
+    , { hour: '-', visits: 0 });
 
   return {
     // Visitors
     totalVisitorsToday: todayVisitors.length,
-    currentlyInside: currentlyInside.length,
-    averageDuration: durationStats.formattedAverage,
-    
-    // Books
-    totalBooks: books?.length || 0,
-    totalAvailableBooks: books?.reduce((sum, b) => sum + (b.availableCopies || 0), 0) || 0,
-    
-    // Loans
-    totalActiveLoans: activeLoans.length,
-    lateRate: lateAnalysis.lateRate,
-    
+    totalVisitorsPeriod: visitors?.length || 0,
+
+    // Stats Entry Only
+    topRoomName: topRoom.name,
+    topRoomCount: topRoom.count,
+
+    busiestHour: busiestHourObj.hour,
+    busiestHourCount: busiestHourObj.visits,
+
     // Meta
     lastUpdated: format(todayDate, 'dd MMM yyyy HH:mm')
   };
@@ -870,8 +954,8 @@ export function getActiveVisitors(visitors) {
       faculty: v.faculty,
       major: v.major,
       entryTime: v.entryTime,
-      entryTimeFormatted: safeParse(v.entryTime) 
-        ? format(safeParse(v.entryTime), 'HH:mm') 
+      entryTimeFormatted: safeParse(v.entryTime)
+        ? format(safeParse(v.entryTime), 'HH:mm')
         : '-'
     }));
 }
@@ -889,8 +973,8 @@ export function searchBooks(books, query) {
   }
 
   const lowerQuery = query.toLowerCase().trim();
-  
-  return books.filter(book => 
+
+  return books.filter(book =>
     book.title.toLowerCase().includes(lowerQuery) ||
     book.author.toLowerCase().includes(lowerQuery) ||
     book.category.toLowerCase().includes(lowerQuery)

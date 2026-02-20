@@ -1,4 +1,4 @@
 export { default as KPICards } from './KPICards';
-export { default as TrendChart } from '../../utils/TrendChart';
-export { default as CategoryChart } from './CategoryChart';
-export { default as SmartInsights } from './SmartInsights';
+export { default as TrendChart } from './TrendChart';
+export { default as RightStatsSidebar } from './RightStatsSidebar';
+// export { default as LeaderboardPanel } from './LeaderboardPanel'; // Deprecated

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { config } from '../services/api';
 
 /**
@@ -16,12 +16,20 @@ export function useDataFetch(fetchFn, deps = [], options = {}) {
 
   const { autoFetch = true, refreshInterval = null } = options;
 
+  const fetchFnRef = useRef(fetchFn);
+
+  // Update ref on render
+  useEffect(() => {
+    fetchFnRef.current = fetchFn;
+  });
+
   const fetchData = useCallback(async () => {
+    // console.log('Fetching data...'); // Debug
     setLoading(true);
     setError(null);
-    
+
     try {
-      const result = await fetchFn();
+      const result = await fetchFnRef.current();
       if (result.error) {
         setError(result.error);
         setData(null);
@@ -35,8 +43,8 @@ export function useDataFetch(fetchFn, deps = [], options = {}) {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchFn, ...deps]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...deps]);
 
   // Initial fetch
   useEffect(() => {
@@ -48,7 +56,7 @@ export function useDataFetch(fetchFn, deps = [], options = {}) {
   // Auto refresh
   useEffect(() => {
     if (!refreshInterval) return;
-    
+
     const interval = setInterval(fetchData, refreshInterval);
     return () => clearInterval(interval);
   }, [refreshInterval, fetchData]);
@@ -61,7 +69,7 @@ export function useDataFetch(fetchFn, deps = [], options = {}) {
  */
 export function useVisitors(options = {}) {
   const { getVisitors } = require('../services/visitorService');
-  
+
   return useDataFetch(
     () => getVisitors(options),
     [options.startDate, options.endDate],
@@ -74,7 +82,7 @@ export function useVisitors(options = {}) {
  */
 export function useLoans(options = {}) {
   const { getLoans } = require('../services/loanService');
-  
+
   return useDataFetch(
     () => getLoans(options),
     [options.startDate, options.endDate, options.status],
@@ -87,7 +95,7 @@ export function useLoans(options = {}) {
  */
 export function useBooks(options = {}) {
   const { getBooks } = require('../services/bookService');
-  
+
   return useDataFetch(
     () => getBooks(options),
     [options.category, options.search, options.limit]
@@ -119,4 +127,82 @@ export function useDashboardData(dateRange = {}) {
     error,
     refetch: refetchAll,
   };
+}
+
+/**
+ * useAudiovisual - Hook untuk data kunjungan audiovisual
+ */
+export function useAudiovisual(options = {}) {
+  const { getAudiovisualVisits } = require('../services/audiovisualService');
+
+  return useDataFetch(
+    () => getAudiovisualVisits(options),
+    [options.startDate, options.endDate],
+    { refreshInterval: config.refreshInterval }
+  );
+}
+
+/**
+ * useReferensi - Hook untuk data kunjungan ruangan referensi
+ */
+export function useReferensi(options = {}) {
+  const { getReferensiVisits } = require('../services/referensiService');
+
+  return useDataFetch(
+    () => getReferensiVisits(options),
+    [options.startDate, options.endDate],
+    { refreshInterval: config.refreshInterval }
+  );
+}
+
+/**
+ * useSirkulasi - Hook untuk data kunjungan sirkulasi per lantai
+ */
+export function useSirkulasi(floor = 1, options = {}) {
+  const { getSirkulasiVisits } = require('../services/sirkulasiService');
+
+  return useDataFetch(
+    () => getSirkulasiVisits({ ...options, lantai: floor }),
+    [floor, options.startDate, options.endDate],
+    { refreshInterval: config.refreshInterval }
+  );
+}
+
+/**
+ * useKarel - Hook untuk data kunjungan Ruang Karel
+ */
+export function useKarel(options = {}) {
+  const { getKarelVisits } = require('../services/karelService');
+
+  return useDataFetch(
+    () => getKarelVisits(options),
+    [options.startDate, options.endDate],
+    { refreshInterval: config.refreshInterval }
+  );
+}
+
+/**
+ * useSmartLab - Hook untuk data kunjungan SmartLab
+ */
+export function useSmartLab(options = {}) {
+  const { getSmartLabVisits } = require('../services/smartlabService');
+
+  return useDataFetch(
+    () => getSmartLabVisits(options),
+    [options.startDate, options.endDate],
+    { refreshInterval: config.refreshInterval }
+  );
+}
+
+/**
+ * useBICorner - Hook untuk data kunjungan BI Corner
+ */
+export function useBICorner(options = {}) {
+  const { getBICornerVisits } = require('../services/bicornerService');
+
+  return useDataFetch(
+    () => getBICornerVisits(options),
+    [options.startDate, options.endDate],
+    { refreshInterval: config.refreshInterval }
+  );
 }

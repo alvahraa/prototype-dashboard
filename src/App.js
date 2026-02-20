@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, Zap } from 'lucide-react';
+import { Terminal, Zap, Sun, Moon } from 'lucide-react';
+import './index.css';
 import './index.css';
 import { Sidebar, Header } from './components/Layout';
-import { DashboardPage, VisitorsPage, LoansPage, RecommendationsPage, LoginPage, ConsolePage } from './pages';
-import { DataModeIndicator } from './components/Common';
+import logoWhite from './assets/logo-unisula.jpeg';
+import { DashboardPage, VisitorsPage, AudiovisualPage, ReferensiPage, SirkulasiPage, KarelPage, SmartLabPage, BICornerPage, RecommendationsPage, LoginPage, ConsolePage, HistoricalDataPage, LockerPage, AdminPage, OperatingHoursPage } from './pages';
+
+
+import { NotificationProvider } from './context/NotificationContext';
+import { regenerateData } from './data/generateDummyData';
 
 /**
  * Main App Component
@@ -21,9 +26,18 @@ import { DataModeIndicator } from './components/Common';
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
   visitors: 'Analisis Kunjungan',
-  loans: 'Analisis Peminjaman',
+  audiovisual: 'Kunjungan Audiovisual',
+  referensi: 'Ruangan Referensi',
+  sirkulasi: 'Ruangan Baca',
+  karel: 'Ruang Karel',
+  smartlab: 'SmartLab',
+  bicorner: 'BI Corner',
   recommendations: 'Sistem Rekomendasi',
-  console: 'System Console'
+  console: 'System Console',
+  historical: 'Riwayat & Metadata',
+  locker: 'Monitoring Loker',
+  admin: 'Manajemen Admin',
+  'operating-hours': 'Jam Operasional'
 };
 
 // Storage key for auth
@@ -32,8 +46,8 @@ const AUTH_KEY = 'prototype_auth';
 // Page transition variants
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
-  enter: { 
-    opacity: 1, 
+  enter: {
+    opacity: 1,
     y: 0,
     transition: {
       type: 'spring',
@@ -41,8 +55,8 @@ const pageVariants = {
       damping: 25,
     }
   },
-  exit: { 
-    opacity: 0, 
+  exit: {
+    opacity: 0,
     y: -8,
     transition: { duration: 0.15 }
   }
@@ -67,7 +81,7 @@ function StealthToast({ show, onComplete }) {
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100]"
         >
-          <div 
+          <div
             className="flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl"
             style={{
               background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
@@ -97,6 +111,30 @@ function App() {
   const [user, setUser] = useState(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [showStealthToast, setShowStealthToast] = useState(false);
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Theme State
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved ? saved === 'dark' : true;
+  });
+
+  const toggleTheme = () => {
+    setIsDarkMode(prev => {
+      const newMode = !prev;
+      localStorage.setItem('theme', newMode ? 'dark' : 'light');
+      return newMode;
+    });
+  };
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -134,9 +172,25 @@ function App() {
       }
     };
 
+    // Handle custom navigation events
+    const handleNavigate = (e) => {
+      const pageId = e.detail;
+      setActivePage(pageId);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleGodMode]);
+    window.addEventListener('navigate', handleNavigate);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('navigate', handleNavigate);
+    };
+  }, [handleGodMode, activePage]);
+
+  // Handle sidebar navigation
+  // Handle sidebar navigation
+  const onNavigate = (pageId) => {
+    setActivePage(pageId);
+  };
 
   // Handle login
   const handleLogin = (userData) => {
@@ -156,9 +210,18 @@ function App() {
     const pages = {
       dashboard: <DashboardPage />,
       visitors: <VisitorsPage />,
-      loans: <LoansPage />,
+      audiovisual: <AudiovisualPage />,
+      referensi: <ReferensiPage />,
+      sirkulasi: <SirkulasiPage />,
+      karel: <KarelPage />,
+      smartlab: <SmartLabPage />,
+      bicorner: <BICornerPage />,
       recommendations: <RecommendationsPage />,
       console: <ConsolePage />,
+      historical: <HistoricalDataPage onBack={() => setActivePage('visitors')} />,
+      locker: <LockerPage />,
+      admin: <AdminPage />,
+      'operating-hours': <OperatingHoursPage />,
     };
     return pages[activePage] || <DashboardPage />;
   };
@@ -167,66 +230,124 @@ function App() {
   if (isCheckingAuth) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50">
-        <motion.div 
+        <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-          className="w-8 h-8 border-4 border-gray-900 border-t-transparent rounded-full" 
+          className="w-8 h-8 border-4 border-gray-900 border-t-transparent rounded-full"
         />
       </div>
     );
   }
 
-  // Show login page if not authenticated
-  if (!user) {
+  // Check for Public Mode
+  const isPublicMode = new URLSearchParams(window.location.search).get('mode') === 'public';
+
+  // Show login page if not authenticated and not in public mode
+  if (!user && !isPublicMode) {
     return <LoginPage onLogin={handleLogin} />;
+  }
+
+  // Handle Public Mode Layout
+  if (isPublicMode) {
+    return (
+      <div className={`flex h-screen overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-gray-950' : 'bg-gray-50'}`}>
+        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+          {/* Public Header - Simplified */}
+          <div className={`backdrop-blur-md border-b px-8 py-4 flex items-center justify-between z-10 shrink-0 ${isDarkMode ? 'bg-gray-900/50 border-white/5' : 'bg-white/50 border-gray-200'
+            }`}>
+            <div className="flex items-center gap-4">
+              <img
+                src={logoWhite}
+                alt="Logo"
+                className={`h-12 w-auto transition-all duration-300 ${!isDarkMode ? 'invert opacity-90' : ''}`}
+              />
+            </div>
+            <div className="flex items-center gap-4">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-full transition-colors ${isDarkMode ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+
+              <div className="px-4 py-1.5 bg-indigo-500/20 rounded-full border border-indigo-500/30 text-indigo-300 text-sm font-medium animate-pulse">
+                Live Monitoring
+              </div>
+              <div className="text-gray-400 text-sm">
+                {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content - Full Width */}
+          <main className={`flex-1 overflow-auto p-6 ${isDarkMode ? 'bg-gray-950' : 'bg-slate-50'}`}>
+            <div className={isDarkMode ? 'text-gray-100' : 'text-gray-900'}>
+              <DashboardPage />
+            </div>
+          </main>
+        </div>
+      </div>
+    );
   }
 
   // Show dashboard if authenticated
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden transition-colors">
-      {/* Sidebar */}
-      <Sidebar 
-        activePage={activePage} 
-        onNavigate={setActivePage}
-        user={user}
-        onLogout={handleLogout}
-      />
-      
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col ml-64 overflow-hidden">
-        {/* Header - hide for console page */}
-        {activePage !== 'console' && (
-          <Header 
-            title={PAGE_TITLES[activePage]} 
-            activePage={activePage}
-            user={user}
-            onNavigate={setActivePage}
-          />
-        )}
-        
-        {/* Page Content with Transitions */}
-        <main className={`flex-1 overflow-auto ${activePage !== 'console' ? 'p-6' : ''}`}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activePage}
-              variants={pageVariants}
-              initial="initial"
-              animate="enter"
-              exit="exit"
-              className={activePage === 'console' ? 'h-full' : ''}
-            >
-              {renderPage()}
-            </motion.div>
-          </AnimatePresence>
-        </main>
+    <NotificationProvider>
+      <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden transition-colors">
+        {/* Sidebar */}
+        <Sidebar
+          activePage={activePage}
+          onNavigate={onNavigate}
+          user={user}
+          onLogout={handleLogout}
+          collapsed={isSidebarCollapsed}
+          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
+
+        {/* Main Content */}
+        <div className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarCollapsed ? 'ml-20' : 'ml-64'} overflow-hidden`}>
+          {/* Header - hide for console page */}
+          {activePage !== 'console' && (
+            <Header
+              title={PAGE_TITLES[activePage]}
+              activePage={activePage}
+              user={user}
+              onNavigate={setActivePage}
+            />
+          )}
+
+          {/* Page Content with Transitions */}
+          <main className={`flex-1 overflow-auto ${activePage !== 'console' ? 'p-6' : ''}`}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activePage}
+                variants={pageVariants}
+                initial="initial"
+                animate="enter"
+                exit="exit"
+                className={activePage === 'console' ? 'h-full' : ''}
+              >
+                {activePage === 'console' ? (
+                  <ConsolePage onRegenerateData={regenerateData} />
+                ) : (
+                  renderPage()
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </main>
+        </div>
+
+
+
+
+
+        {/* Stealth Toast */}
+        <StealthToast show={showStealthToast} onComplete={handleStealthComplete} />
       </div>
-
-      {/* Demo Mode Badge */}
-      <DataModeIndicator />
-
-      {/* Stealth Toast */}
-      <StealthToast show={showStealthToast} onComplete={handleStealthComplete} />
-    </div>
+    </NotificationProvider>
   );
 }
 

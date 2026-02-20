@@ -6,5 +6,8 @@ export { MotionCard, MotionContainer, MotionButton, MotionPage, MotionGrid } fro
 export { Tabs, TabPanel } from './Tabs';
 export { ViewToggle } from './ViewToggle';
 export { default as CommandPalette } from './CommandPalette';
+export { default as NotificationDropdown } from './NotificationDropdown';
 export { default as ControlBar } from './ControlBar';
 export { default as ExportButton } from './ExportButton';
+export { default as VisitTrendChart } from './VisitTrendChart';
+

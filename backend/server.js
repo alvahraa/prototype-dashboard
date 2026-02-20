@@ -51,7 +51,6 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Initialize database and start server
 // Initialize database and setup routes
 async function setupApp() {
     await initDatabase();

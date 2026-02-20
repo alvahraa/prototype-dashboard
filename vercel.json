@@ -1,4 +1,9 @@
 {
+    "functions": {
+        "api/index.js": {
+            "includeFiles": "backend/**"
+        }
+    },
     "rewrites": [
         {
             "source": "/api/(.*)",
@@ -13,7 +18,7 @@
             "destination": "/absensi/$1"
         },
         {
-            "source": "/((?!api|absensi|.*\\..*).*)",
+            "source": "/((?!api|absensi|.*\\\\..*).*)",
             "destination": "/index.html"
         }
     ]

@@ -1,11 +1,12 @@
 /**
  * Visits API Routes
  * Endpoints for managing library attendance
+ * Refactored for PostgreSQL
  */
 
 const express = require('express');
 const router = express.Router();
-const { getDb, saveDatabase } = require('../database');
+const { getDb, query } = require('../database');
 
 // Faculty mapping from prodi
 const FACULTY_MAP = {
@@ -60,13 +61,8 @@ const VALID_ROOMS = ['audiovisual', 'referensi', 'sirkulasi_l1', 'sirkulasi_l2',
  * POST /api/visits
  * Submit new attendance
  */
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     try {
-        const db = getDb();
-        if (!db) {
-            return res.status(503).json({ success: false, error: 'Database not initialized' });
-        }
-
         const { nama, nim, prodi, gender, ruangan, locker_number, umur } = req.body;
 
         // Validation
@@ -104,24 +100,24 @@ router.post('/', (req, res) => {
             });
         }
 
-        // Use transaction for multiple inserts
-        db.run('BEGIN TRANSACTION');
+        const pool = getDb();
+        const client = await pool.connect();
 
         try {
-            const stmt = db.prepare(`
+            await client.query('BEGIN');
+
+            const queryText = `
                 INSERT INTO visits (nama, nim, prodi, faculty, gender, ruangan, umur, locker_number, visit_time)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now', 'localtime'))
-            `);
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP)
+            `;
 
-            roomsToInsert.forEach(room => {
-                stmt.run([nama, nim, prodi, faculty, gender, room, umur || null, locker_number || null]);
-            });
+            for (const room of roomsToInsert) {
+                await client.query(queryText, [
+                    nama, nim, prodi, faculty, gender, room, umur || null, locker_number || null
+                ]);
+            }
 
-            stmt.free();
-            db.run('COMMIT');
-
-            // Save to file
-            saveDatabase();
+            await client.query('COMMIT');
 
             res.status(201).json({
                 success: true,
@@ -135,8 +131,10 @@ router.post('/', (req, res) => {
             });
 
         } catch (insertError) {
-            db.run('ROLLBACK');
+            await client.query('ROLLBACK');
             throw insertError;
+        } finally {
+            client.release();
         }
 
     } catch (error) {
@@ -152,58 +150,44 @@ router.post('/', (req, res) => {
  * GET /api/visits
  * Get visits with optional filters
  */
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
-        const db = getDb();
-        if (!db) {
-            return res.status(503).json({ success: false, error: 'Database not initialized' });
-        }
-
         const { ruangan, startDate, endDate, locker_number, limit = 1000 } = req.query;
         const safeLimitNum = Math.min(Math.max(parseInt(limit) || 1000, 1), 5000);
 
-        let query = 'SELECT * FROM visits WHERE 1=1';
+        let sql = 'SELECT * FROM visits WHERE 1=1';
         const params = [];
+        let paramIdx = 1;
 
         if (locker_number) {
-            query += ' AND locker_number = ?';
+            sql += ` AND locker_number = $${paramIdx++}`;
             params.push(locker_number);
         }
 
         if (ruangan) {
-            query += ' AND ruangan = ?';
+            sql += ` AND ruangan = $${paramIdx++}`;
             params.push(ruangan);
         }
 
         if (startDate) {
-            query += ' AND visit_time >= ?';
+            sql += ` AND visit_time >= $${paramIdx++}`;
             params.push(startDate);
         }
 
         if (endDate) {
-            query += ' AND visit_time <= ?';
+            sql += ` AND visit_time <= $${paramIdx++}`;
             params.push(endDate);
         }
 
-        query += ` ORDER BY visit_time DESC LIMIT ${safeLimitNum}`;
+        sql += ` ORDER BY visit_time DESC LIMIT $${paramIdx}`;
+        params.push(safeLimitNum);
 
-        const result = db.exec(query, params);
-
-        // Convert to array of objects
-        const visits = [];
-        if (result.length > 0) {
-            const columns = result[0].columns;
-            result[0].values.forEach(row => {
-                const visit = {};
-                columns.forEach((col, i) => visit[col] = row[i]);
-                visits.push(visit);
-            });
-        }
+        const result = await query(sql, params);
 
         res.json({
             success: true,
-            count: visits.length,
-            data: visits
+            count: result.rowCount,
+            data: result.rows
         });
 
     } catch (error) {
@@ -219,86 +203,79 @@ router.get('/', (req, res) => {
  * GET /api/visits/stats
  * Get aggregated statistics
  */
-router.get('/stats', (req, res) => {
+router.get('/stats', async (req, res) => {
     try {
-        const db = getDb();
-        if (!db) {
-            return res.status(503).json({ success: false, error: 'Database not initialized' });
-        }
-
         const { ruangan, days = 30 } = req.query;
         const safeDays = Math.min(Math.max(parseInt(days) || 30, 1), 3650);
 
-        // Helper: parameterized query runner
-        const runQuery = (sql, params = []) => {
-            const stmt = db.prepare(sql);
-            stmt.bind(params);
-            const rows = [];
-            while (stmt.step()) {
-                rows.push(stmt.getAsObject());
-            }
-            stmt.free();
-            return rows;
-        };
+        // Helper: parameterized query runner is now just 'query'
 
-        // Build parameterized WHERE clause
-        const baseWhere = `WHERE visit_time >= datetime('now', '-' || ? || ' days', 'localtime')`;
-        const baseParams = [String(safeDays)];
+        // Base WHERE clause for Postgres
+        // usage: NOW() - ($1 || ' days')::interval
+        let baseWhere = `WHERE visit_time >= NOW() - ($1 || ' days')::interval`;
+        let baseParams = [String(safeDays)];
+        let paramIdx = 2; // Next param index
 
-        let whereClause = baseWhere;
-        let whereParams = [...baseParams];
         if (ruangan) {
-            whereClause += ' AND ruangan = ?';
-            whereParams.push(ruangan);
+            baseWhere += ` AND ruangan = $${paramIdx}`;
+            baseParams.push(ruangan);
+            paramIdx++; // 3
         }
 
         // Total visits
-        const totalResult = runQuery(
-            `SELECT COUNT(*) as total FROM visits ${whereClause}`,
-            whereParams
+        const totalResult = await query(
+            `SELECT COUNT(*) as total FROM visits ${baseWhere}`,
+            baseParams
         );
-        const totalVisits = totalResult[0]?.total || 0;
+        const totalVisits = parseInt(totalResult.rows[0]?.total || 0);
 
         // Visits by room
-        const byRoom = runQuery(
-            `SELECT ruangan, COUNT(*) as count FROM visits ${whereClause} GROUP BY ruangan ORDER BY count DESC`,
-            whereParams
+        const byRoomResult = await query(
+            `SELECT ruangan, COUNT(*) as count FROM visits ${baseWhere} GROUP BY ruangan ORDER BY count DESC`,
+            baseParams
         );
 
         // Visits by faculty
-        const byFaculty = runQuery(
-            `SELECT faculty, COUNT(*) as count FROM visits ${whereClause} GROUP BY faculty ORDER BY count DESC`,
-            whereParams
+        const byFacultyResult = await query(
+            `SELECT faculty, COUNT(*) as count FROM visits ${baseWhere} GROUP BY faculty ORDER BY count DESC`,
+            baseParams
         );
 
         // Visits by gender
-        const byGender = runQuery(
-            `SELECT gender, COUNT(*) as count FROM visits ${whereClause} GROUP BY gender`,
-            whereParams
+        const byGenderResult = await query(
+            `SELECT gender, COUNT(*) as count FROM visits ${baseWhere} GROUP BY gender`,
+            baseParams
         );
 
-        // Daily trend (last 7 days) — also parameterized
-        const trendParams = ruangan ? [ruangan] : [];
-        const dailyTrend = runQuery(
-            `SELECT DATE(visit_time) as date, COUNT(*) as count FROM visits WHERE visit_time >= datetime('now', '-7 days', 'localtime')${ruangan ? ' AND ruangan = ?' : ''} GROUP BY DATE(visit_time) ORDER BY date`,
-            trendParams
-        );
+        // Daily trend (last 7 days)
+        // Note: Re-building params for this specific query
+        let trendSql = `SELECT DATE(visit_time) as date, COUNT(*) as count FROM visits WHERE visit_time >= NOW() - INTERVAL '7 days'`;
+        let trendParams = [];
+        let trendParamIdx = 1;
+
+        if (ruangan) {
+            trendSql += ` AND ruangan = $${trendParamIdx}`;
+            trendParams.push(ruangan);
+        }
+        trendSql += ` GROUP BY DATE(visit_time) ORDER BY date`;
+
+        const dailyTrendResult = await query(trendSql, trendParams);
 
         // Peak hours
-        const peakHours = runQuery(
-            `SELECT strftime('%H', visit_time) as hour, COUNT(*) as count FROM visits ${whereClause} GROUP BY hour ORDER BY count DESC LIMIT 5`,
-            whereParams
+        const peakHoursResult = await query(
+            `SELECT TO_CHAR(visit_time, 'HH24') as hour, COUNT(*) as count FROM visits ${baseWhere} GROUP BY hour ORDER BY count DESC LIMIT 5`,
+            baseParams
         );
 
         res.json({
             success: true,
             data: {
                 totalVisits,
-                byRoom,
-                byFaculty,
-                byGender,
-                dailyTrend,
-                peakHours
+                byRoom: byRoomResult.rows,
+                byFaculty: byFacultyResult.rows,
+                byGender: byGenderResult.rows,
+                dailyTrend: dailyTrendResult.rows,
+                peakHours: peakHoursResult.rows
             }
         });
 
@@ -313,52 +290,40 @@ router.get('/stats', (req, res) => {
 
 /**
  * PUT /api/visits/return-locker-by-number
- * Student/Librarian returns a locker by entering the locker number
- * Finds the latest active (un-returned) visit for that locker and marks it as returned
- * 
- * IMPORTANT: This route MUST be defined BEFORE /:id/return-locker
- * Otherwise Express matches "return-locker-by-number" as the :id param
  */
-router.put('/return-locker-by-number', (req, res) => {
+router.put('/return-locker-by-number', async (req, res) => {
     try {
-        const db = getDb();
-        if (!db) {
-            return res.status(503).json({ success: false, error: 'Database not initialized' });
-        }
-
         const { locker_number } = req.body;
         if (!locker_number) {
             return res.status(400).json({ success: false, error: 'Nomor loker harus diisi' });
         }
 
         // Find the latest active visit for this locker today
-        const findStmt = db.prepare(`
+        // Postgres: CURRENT_DATE
+        const findResult = await query(`
             SELECT id, nama, nim, prodi, locker_number, visit_time, locker_returned_at 
             FROM visits 
-            WHERE locker_number = ? 
+            WHERE locker_number = $1 
               AND locker_returned_at IS NULL 
-              AND DATE(visit_time) = DATE('now', 'localtime')
+              AND DATE(visit_time) = CURRENT_DATE
             ORDER BY visit_time DESC 
             LIMIT 1
-        `);
-        findStmt.bind([String(locker_number)]);
+        `, [String(locker_number)]);
 
-        if (!findStmt.step()) {
-            findStmt.free();
+        if (findResult.rowCount === 0) {
             return res.status(404).json({
                 success: false,
                 error: `Tidak ditemukan peminjaman aktif untuk Loker #${locker_number} hari ini`
             });
         }
 
-        const visit = findStmt.getAsObject();
-        findStmt.free();
+        const visit = findResult.rows[0];
 
         // Mark as returned
-        const updateStmt = db.prepare(`UPDATE visits SET locker_returned_at = datetime('now', 'localtime') WHERE id = ?`);
-        updateStmt.run([visit.id]);
-        updateStmt.free();
-        saveDatabase();
+        await query(
+            `UPDATE visits SET locker_returned_at = CURRENT_TIMESTAMP WHERE id = $1`,
+            [visit.id]
+        );
 
         res.json({
             success: true,
@@ -380,31 +345,25 @@ router.put('/return-locker-by-number', (req, res) => {
 
 /**
  * PUT /api/visits/:id/return-locker
- * Admin manually marks a locker as returned
  */
-router.put('/:id/return-locker', (req, res) => {
+router.put('/:id/return-locker', async (req, res) => {
     try {
-        const db = getDb();
-        if (!db) {
-            return res.status(503).json({ success: false, error: 'Database not initialized' });
-        }
-
         const visitId = parseInt(req.params.id);
         if (isNaN(visitId)) {
             return res.status(400).json({ success: false, error: 'Invalid visit ID' });
         }
 
         // Check if visit exists and has a locker
-        const checkStmt = db.prepare(`SELECT id, locker_number, locker_returned_at FROM visits WHERE id = ?`);
-        checkStmt.bind([visitId]);
+        const checkResult = await query(
+            `SELECT id, locker_number, locker_returned_at FROM visits WHERE id = $1`,
+            [visitId]
+        );
 
-        if (!checkStmt.step()) {
-            checkStmt.free();
+        if (checkResult.rowCount === 0) {
             return res.status(404).json({ success: false, error: 'Visit not found' });
         }
 
-        const row = checkStmt.getAsObject();
-        checkStmt.free();
+        const row = checkResult.rows[0];
 
         if (!row.locker_number) {
             return res.status(400).json({ success: false, error: 'This visit has no locker assigned' });
@@ -415,10 +374,10 @@ router.put('/:id/return-locker', (req, res) => {
         }
 
         // Mark as returned
-        const updateStmt = db.prepare(`UPDATE visits SET locker_returned_at = datetime('now', 'localtime') WHERE id = ?`);
-        updateStmt.run([visitId]);
-        updateStmt.free();
-        saveDatabase();
+        await query(
+            `UPDATE visits SET locker_returned_at = CURRENT_TIMESTAMP WHERE id = $1`,
+            [visitId]
+        );
 
         res.json({
             success: true,
@@ -432,4 +391,3 @@ router.put('/:id/return-locker', (req, res) => {
 });
 
 module.exports = router;
-

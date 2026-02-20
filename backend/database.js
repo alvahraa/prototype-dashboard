@@ -1,90 +1,80 @@
 /**
  * Database configuration for Perpustakaan UNISSULA
- * Uses sql.js (pure JavaScript SQLite)
+ * Uses PostgreSQL (Supabase) via 'pg' library
  */
 
-// Use pure JS (ASM) version in production (Vercel) to avoid WASM file issues
-// WASM version is faster but requires binary file access which fails on serverless
-const initSqlJs = process.env.NODE_ENV === 'production'
-    ? require('sql.js/dist/sql-asm.js')
-    : require('sql.js');
+const { Pool } = require('pg');
 
-const path = require('path');
-const fs = require('fs');
+// Create a new pool using the connection string from environment variables
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false // Required for Supabase/Heroku secure connections
+    },
+    max: 20, // Max clients in the pool
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+});
 
-// Ensure data directory exists
-let dbPath;
-if (process.env.NODE_ENV === 'production') {
-    dbPath = path.join('/tmp', 'library.db');
-} else {
-    const dataDir = path.join(__dirname, 'data');
-    if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-    }
-    dbPath = path.join(dataDir, 'library.db');
-}
-
-let db = null;
+// Helper to run queries
+const query = (text, params) => pool.query(text, params);
 
 async function initDatabase() {
-    const SQL = await initSqlJs();
+    try {
+        console.log('Initializing database connection...');
 
-    // In production (Vercel), log the path we are using
-    if (process.env.NODE_ENV === 'production') {
-        console.log('Using database at:', dbPath);
-    }
+        // Test connection
+        await pool.query('SELECT NOW()');
+        console.log('✓ Connected to Supabase');
 
-    // Load existing database or create new one
-    if (fs.existsSync(dbPath)) {
-        const fileBuffer = fs.readFileSync(dbPath);
-        db = new SQL.Database(fileBuffer);
-        console.log('✓ Loaded existing database');
-    } else {
-        db = new SQL.Database();
-        console.log('✓ Created new database');
-    }
+        // Create tables
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS visits (
+                id SERIAL PRIMARY KEY,
+                nama TEXT NOT NULL,
+                nim TEXT NOT NULL,
+                prodi TEXT NOT NULL,
+                faculty TEXT,
+                gender TEXT CHECK(gender IN ('L', 'P')),
+                ruangan TEXT NOT NULL,
+                locker_number TEXT,
+                locker_returned_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+                umur INTEGER,
+                visit_time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
 
-    // Initialize schema
-    db.run(`
-    CREATE TABLE IF NOT EXISTS visits (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nama TEXT NOT NULL,
-      nim TEXT NOT NULL,
-      prodi TEXT NOT NULL,
-      faculty TEXT,
-      gender TEXT CHECK(gender IN ('L', 'P')),
-      ruangan TEXT NOT NULL,
-      locker_number TEXT,
-      visit_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+        // Index for visits
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_visits_ruangan ON visits(ruangan)`);
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_visits_visit_time ON visits(visit_time)`);
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_visits_nim ON visits(nim)`);
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_visits_room_time ON visits(ruangan, visit_time)`);
 
-    // Admins table for authentication
-    db.run(`
-    CREATE TABLE IF NOT EXISTS admins (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      display_name TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS admins (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                display_name TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
 
-    // Settings table for configurable values (operating hours, etc.)
-    db.run(`
-    CREATE TABLE IF NOT EXISTS settings (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
 
-    // Seed default operating hours if not set
-    const existingHours = db.exec("SELECT value FROM settings WHERE key = 'operating_hours'");
-    if (existingHours.length === 0) {
-        db.run(`INSERT INTO settings (key, value) VALUES ('operating_hours', ?)`, [
-            JSON.stringify({
+        console.log('✓ Database schema initialized');
+
+        // Seed default operating hours if not set
+        const hoursCheck = await pool.query("SELECT value FROM settings WHERE key = 'operating_hours'");
+        if (hoursCheck.rowCount === 0) {
+            const defaultHours = JSON.stringify({
                 senin: { buka: '08:00', tutup: '17:00', aktif: true },
                 selasa: { buka: '08:00', tutup: '17:00', aktif: true },
                 rabu: { buka: '08:00', tutup: '17:00', aktif: true },
@@ -92,97 +82,34 @@ async function initDatabase() {
                 jumat: { buka: '08:00', tutup: '17:00', aktif: true },
                 sabtu: { buka: '08:00', tutup: '12:00', aktif: true },
                 minggu: { buka: '00:00', tutup: '00:00', aktif: false },
-            })
-        ]);
-    }
+            });
+            await pool.query("INSERT INTO settings (key, value) VALUES ('operating_hours', $1)", [defaultHours]);
+            console.log('✓ Default operating hours seeded');
+        }
 
-    // Create indexes if not exists
-    db.run(`CREATE INDEX IF NOT EXISTS idx_visits_ruangan ON visits(ruangan)`);
-    db.run(`CREATE INDEX IF NOT EXISTS idx_visits_visit_time ON visits(visit_time)`);
-    db.run(`CREATE INDEX IF NOT EXISTS idx_visits_nim ON visits(nim)`);
-    db.run(`CREATE INDEX IF NOT EXISTS idx_visits_room_time ON visits(ruangan, visit_time)`);
+        // Seed default admin if no admins exist
+        const adminCheck = await pool.query('SELECT COUNT(*) FROM admins');
+        const adminCount = parseInt(adminCheck.rows[0].count);
 
-    // Migration: Add umur column if not exists
-    try {
-        db.run("ALTER TABLE visits ADD COLUMN umur INTEGER");
-        console.log('✓ Added umur column to visits table');
-    } catch (e) {
-        // Column likely already exists, ignore
-    }
+        if (adminCount === 0) {
+            const bcrypt = require('bcryptjs');
+            const salt = bcrypt.genSaltSync(10);
+            const hash = bcrypt.hashSync('admin123', salt);
+            await pool.query(
+                'INSERT INTO admins (username, password_hash, display_name) VALUES ($1, $2, $3)',
+                ['admin', hash, 'Administrator']
+            );
+            console.log('✓ Default admin seeded (admin / admin123)');
+        }
 
-    // Migration: Add locker_number column if not exists
-    try {
-        db.run("ALTER TABLE visits ADD COLUMN locker_number TEXT");
-        console.log('✓ Added locker_number column to visits table');
-    } catch (e) {
-        // Column likely already exists, ignore
-    }
-
-    // Migration: Add locker_returned_at column if not exists
-    try {
-        db.run("ALTER TABLE visits ADD COLUMN locker_returned_at DATETIME DEFAULT NULL");
-        console.log('✓ Added locker_returned_at column to visits table');
-    } catch (e) {
-        // Column likely already exists, ignore
-    }
-
-    console.log('✓ Database schema initialized');
-
-    // Seed default admin if no admins exist (critical for Vercel ephemeral DB)
-    const adminCheck = db.exec('SELECT COUNT(*) FROM admins');
-    const adminCount = adminCheck.length > 0 ? adminCheck[0].values[0][0] : 0;
-    if (adminCount === 0) {
-        const bcrypt = require('bcryptjs');
-        const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync('admin123', salt);
-        db.run(
-            'INSERT INTO admins (username, password_hash, display_name) VALUES (?, ?, ?)',
-            ['admin', hash, 'Administrator']
-        );
-        console.log('✓ Default admin seeded (admin / admin123)');
-    }
-
-    // Save to file (initial save is synchronous)
-    flushDatabase();
-
-    return db;
-}
-
-// Internal: immediate synchronous write
-function flushDatabase() {
-    if (db) {
-        const data = db.export();
-        const buffer = Buffer.from(data);
-        fs.writeFileSync(dbPath, buffer);
+    } catch (error) {
+        console.error('Database initialization failed:', error);
+        throw error;
     }
 }
 
-// Debounced save: batches writes to at most once per 5 seconds
-// Prevents event loop blocking during high traffic
-let saveTimer = null;
-function saveDatabase() {
-    if (saveTimer) return; // Already scheduled
-    saveTimer = setTimeout(() => {
-        flushDatabase();
-        saveTimer = null;
-    }, 5000);
-}
-
-// Graceful shutdown: flush pending writes before exit
-function handleShutdown() {
-    if (saveTimer) {
-        clearTimeout(saveTimer);
-        saveTimer = null;
-    }
-    flushDatabase();
-    console.log('✓ Database flushed to disk');
-    process.exit(0);
-}
-process.on('SIGINT', handleShutdown);
-process.on('SIGTERM', handleShutdown);
-
-function getDb() {
-    return db;
-}
-
-module.exports = { initDatabase, getDb, saveDatabase };
+module.exports = {
+    initDatabase,
+    query,
+    getDb: () => pool // Backward compatibility wrapper
+};

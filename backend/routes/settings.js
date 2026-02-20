@@ -7,19 +7,20 @@
 
 const express = require('express');
 const router = express.Router();
-const { getDb, saveDatabase } = require('../database');
+const { query } = require('../database');
 
 /**
  * GET /operating-hours
  * Returns the current operating hours configuration
  */
-router.get('/operating-hours', (req, res) => {
+router.get('/operating-hours', async (req, res) => {
     try {
-        const db = getDb();
-        const result = db.exec("SELECT value FROM settings WHERE key = 'operating_hours'");
+        const result = await query("SELECT value FROM settings WHERE key = $1", ['operating_hours']);
 
-        if (result.length > 0 && result[0].values.length > 0) {
-            const hours = JSON.parse(result[0].values[0][0]);
+        if (result.rowCount > 0) {
+            // Postgres returns JSON columns as objects automatically, but we defined it as TEXT in schema 
+            // to match previous behavior, so we parse it.
+            const hours = JSON.parse(result.rows[0].value);
             res.json({ success: true, data: hours });
         } else {
             // Return defaults if not set
@@ -47,7 +48,7 @@ router.get('/operating-hours', (req, res) => {
  * Updates the operating hours configuration
  * Body: { senin: { buka: '08:00', tutup: '17:00', aktif: true }, ... }
  */
-router.put('/operating-hours', (req, res) => {
+router.put('/operating-hours', async (req, res) => {
     try {
         const hours = req.body;
 
@@ -68,24 +69,14 @@ router.put('/operating-hours', (req, res) => {
             }
         }
 
-        const db = getDb();
         const jsonValue = JSON.stringify(hours);
 
-        // Upsert: Update if exists, insert if not
-        const existing = db.exec("SELECT key FROM settings WHERE key = 'operating_hours'");
-        if (existing.length > 0 && existing[0].values.length > 0) {
-            db.run(
-                "UPDATE settings SET value = ?, updated_at = datetime('now') WHERE key = 'operating_hours'",
-                [jsonValue]
-            );
-        } else {
-            db.run(
-                "INSERT INTO settings (key, value) VALUES ('operating_hours', ?)",
-                [jsonValue]
-            );
-        }
-
-        saveDatabase();
+        // Upsert using Postgres syntax
+        await query(
+            `INSERT INTO settings (key, value) VALUES ($1, $2)
+             ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = CURRENT_TIMESTAMP`,
+            ['operating_hours', jsonValue]
+        );
 
         res.json({ success: true, data: hours, message: 'Jam operasional berhasil diperbarui' });
     } catch (error) {

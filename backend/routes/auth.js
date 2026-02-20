@@ -7,7 +7,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
-const { getDb, saveDatabase } = require('../database');
+const { query } = require('../database');
 
 /**
  * POST /api/auth/login
@@ -24,19 +24,16 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        const db = getDb();
-        const stmt = db.prepare('SELECT * FROM admins WHERE username = ?');
-        stmt.bind([username]);
+        const result = await query('SELECT * FROM admins WHERE username = $1', [username]);
 
-        if (!stmt.step()) {
+        if (result.rowCount === 0) {
             return res.status(401).json({
                 success: false,
                 error: 'Username atau password salah'
             });
         }
 
-        const user = stmt.getAsObject();
-        stmt.free();
+        const user = result.rows[0];
 
         // Verify password
         const isValid = await bcrypt.compare(password, user.password_hash);
@@ -90,31 +87,24 @@ router.post('/register', async (req, res) => {
             });
         }
 
-        const db = getDb();
-
         // Check if username exists
-        const checkStmt = db.prepare('SELECT id FROM admins WHERE username = ?');
-        checkStmt.bind([username]);
-        if (checkStmt.step()) {
-            checkStmt.free();
+        const checkResult = await query('SELECT id FROM admins WHERE username = $1', [username]);
+        if (checkResult.rowCount > 0) {
             return res.status(400).json({
                 success: false,
                 error: 'Username sudah digunakan'
             });
         }
-        checkStmt.free();
 
         // Hash password
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
         // Insert new admin
-        db.run(
-            'INSERT INTO admins (username, password_hash, display_name) VALUES (?, ?, ?)',
+        await query(
+            'INSERT INTO admins (username, password_hash, display_name) VALUES ($1, $2, $3)',
             [username, passwordHash, displayName || username]
         );
-
-        saveDatabase();
 
         res.json({
             success: true,
@@ -148,19 +138,16 @@ router.put('/password', async (req, res) => {
             });
         }
 
-        const db = getDb();
-        const stmt = db.prepare('SELECT * FROM admins WHERE username = ?');
-        stmt.bind([username]);
+        const result = await query('SELECT * FROM admins WHERE username = $1', [username]);
 
-        if (!stmt.step()) {
+        if (result.rowCount === 0) {
             return res.status(404).json({
                 success: false,
                 error: 'User tidak ditemukan'
             });
         }
 
-        const user = stmt.getAsObject();
-        stmt.free();
+        const user = result.rows[0];
 
         // Verify current password
         const isValid = await bcrypt.compare(currentPassword, user.password_hash);
@@ -177,12 +164,10 @@ router.put('/password', async (req, res) => {
         const passwordHash = await bcrypt.hash(newPassword, salt);
 
         // Update password
-        db.run(
-            'UPDATE admins SET password_hash = ? WHERE id = ?',
+        await query(
+            'UPDATE admins SET password_hash = $1 WHERE id = $2',
             [passwordHash, user.id]
         );
-
-        saveDatabase();
 
         res.json({
             success: true,
@@ -198,19 +183,16 @@ router.put('/password', async (req, res) => {
  * GET /api/auth/admins
  * Get list of all admins (for admin management)
  */
-router.get('/admins', (req, res) => {
+router.get('/admins', async (req, res) => {
     try {
-        const db = getDb();
-        const results = db.exec('SELECT id, username, display_name, created_at FROM admins ORDER BY created_at DESC');
+        const result = await query('SELECT id, username, display_name, created_at FROM admins ORDER BY created_at DESC');
 
-        const admins = results.length > 0
-            ? results[0].values.map(row => ({
-                id: row[0],
-                username: row[1],
-                displayName: row[2],
-                createdAt: row[3]
-            }))
-            : [];
+        const admins = result.rows.map(row => ({
+            id: row.id,
+            username: row.username,
+            displayName: row.display_name,
+            createdAt: row.created_at
+        }));
 
         res.json({
             success: true,
@@ -228,9 +210,8 @@ router.get('/admins', (req, res) => {
  */
 router.post('/init', async (req, res) => {
     try {
-        const db = getDb();
-        const results = db.exec('SELECT COUNT(*) as count FROM admins');
-        const count = results.length > 0 ? results[0].values[0][0] : 0;
+        const result = await query('SELECT COUNT(*) as count FROM admins');
+        const count = parseInt(result.rows[0].count);
 
         if (count > 0) {
             return res.json({
@@ -244,12 +225,10 @@ router.post('/init', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash('admin123', salt);
 
-        db.run(
-            'INSERT INTO admins (username, password_hash, display_name) VALUES (?, ?, ?)',
+        await query(
+            'INSERT INTO admins (username, password_hash, display_name) VALUES ($1, $2, $3)',
             ['admin', passwordHash, 'Administrator']
         );
-
-        saveDatabase();
 
         res.json({
             success: true,

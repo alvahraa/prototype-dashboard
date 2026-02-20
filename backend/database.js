@@ -128,6 +128,20 @@ async function initDatabase() {
 
     console.log('✓ Database schema initialized');
 
+    // Seed default admin if no admins exist (critical for Vercel ephemeral DB)
+    const adminCheck = db.exec('SELECT COUNT(*) FROM admins');
+    const adminCount = adminCheck.length > 0 ? adminCheck[0].values[0][0] : 0;
+    if (adminCount === 0) {
+        const bcrypt = require('bcryptjs');
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync('admin123', salt);
+        db.run(
+            'INSERT INTO admins (username, password_hash, display_name) VALUES (?, ?, ?)',
+            ['admin', hash, 'Administrator']
+        );
+        console.log('✓ Default admin seeded (admin / admin123)');
+    }
+
     // Save to file (initial save is synchronous)
     flushDatabase();
 

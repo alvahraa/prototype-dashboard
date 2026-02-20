@@ -8,17 +8,26 @@ const path = require('path');
 const fs = require('fs');
 
 // Ensure data directory exists
-const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+let dbPath;
+if (process.env.NODE_ENV === 'production') {
+    dbPath = path.join('/tmp', 'library.db');
+} else {
+    const dataDir = path.join(__dirname, 'data');
+    if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+    }
+    dbPath = path.join(dataDir, 'library.db');
 }
-
-const dbPath = path.join(dataDir, 'library.db');
 
 let db = null;
 
 async function initDatabase() {
     const SQL = await initSqlJs();
+
+    // In production (Vercel), log the path we are using
+    if (process.env.NODE_ENV === 'production') {
+        console.log('Using database at:', dbPath);
+    }
 
     // Load existing database or create new one
     if (fs.existsSync(dbPath)) {

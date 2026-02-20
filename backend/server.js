@@ -52,91 +52,61 @@ app.get('/api/health', (req, res) => {
 });
 
 // Initialize database and start server
-async function startServer() {
-    try {
-        await initDatabase();
+// Initialize database and setup routes
+async function setupApp() {
+    await initDatabase();
 
+    // Routes (after database is ready)
+    // Clear cache to ensure fresh requires if called multiple times in serverless (though usually cold start handles this)
+    const visitsRouter = require('./routes/visits');
+    const authRouter = require('./routes/auth');
+    const settingsRouter = require('./routes/settings');
+    app.use('/api/visits', visitsRouter);
+    app.use('/api/auth', authRouter);
+    app.use('/api/settings', settingsRouter);
 
-        // Routes (after database is ready)
-        const visitsRouter = require('./routes/visits');
-        const authRouter = require('./routes/auth');
-        const settingsRouter = require('./routes/settings');
-        app.use('/api/visits', visitsRouter);
-        app.use('/api/auth', authRouter);
-        app.use('/api/settings', settingsRouter);
+    // Serve static files from React app in production (AFTER API routes)
+    // Serve Form Absensi (Static & Explicit Route)
+    const absensiPath = path.join(__dirname, '../public/absensi');
+    app.use('/absensi', express.static(absensiPath));
 
-        // Serve static files from React app in production (AFTER API routes)
-        // Serve Form Absensi (Static & Explicit Route)
-        const absensiPath = path.join(__dirname, '../form-absensi');
-        app.use('/absensi', express.static(absensiPath));
+    // Handle React routing
+    if (process.env.NODE_ENV === 'production') {
+        const buildPath = path.join(__dirname, '..', 'build');
+        app.use(express.static(buildPath));
 
-        app.get('/absensi', (req, res) => {
-            res.sendFile(path.join(absensiPath, 'index.html'));
+        // Only serve index.html for non-API routes
+        app.get('*', (req, res) => {
+            if (req.path.startsWith('/api')) {
+                return res.status(404).json({ error: 'API endpoint not found' });
+            }
+            res.sendFile(path.join(buildPath, 'index.html'));
         });
-        if (NODE_ENV === 'production') {
-            const buildPath = path.join(__dirname, '..', 'build');
-            app.use(express.static(buildPath));
-
-            // Serve React app for all non-API routes
-            app.get('*', (req, res) => {
-                // Don't serve React app for API routes (shouldn't reach here if API routes work)
-                if (req.path.startsWith('/api')) {
-                    return res.status(404).json({ error: 'API endpoint not found' });
-                }
-                res.sendFile(path.join(buildPath, 'index.html'));
-            });
-        } else {
-            // Development: API info endpoint
-            app.get('/', (req, res) => {
-                res.json({
-                    name: 'Perpustakaan UNISSULA API',
-                    version: '1.0.0',
-                    mode: 'development',
-                    endpoints: {
-                        health: 'GET /api/health',
-                        submitVisit: 'POST /api/visits',
-                        getVisits: 'GET /api/visits',
-                        getStats: 'GET /api/visits/stats'
-                    }
-                });
-            });
-        }
-
-        // Error handling (must be last)
-        app.use((err, req, res, next) => {
-            console.error('Error:', err);
-            res.status(500).json({
-                success: false,
-                error: 'Internal server error'
-            });
+    } else {
+        app.get('/', (req, res) => {
+            res.json({ status: 'Dev API Running' });
         });
-
-
-        app.listen(PORT, () => {
-
-            console.log(`
-╔════════════════════════════════════════════════════╗
-║     Perpustakaan UNISSULA API Server               ║
-╠════════════════════════════════════════════════════╣
-║  Status:  Running                                  ║
-║  Port:    ${PORT}                                       ║
-║  URL:     http://localhost:${PORT}                      ║
-╚════════════════════════════════════════════════════╝
-
-Available endpoints:
-  POST /api/visits       - Submit attendance
-  GET  /api/visits       - Get visits (with filters)
-  GET  /api/visits/stats - Get statistics
-  GET  /api/health       - Health check
-      `);
-        }).on('error', (err) => {
-
-        });
-    } catch (error) {
-
-        console.error('Failed to start server:', error);
-        process.exit(1);
     }
+
+    // Error handling
+    app.use((err, req, res, next) => {
+        console.error('Error:', err);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    });
+
+    return app;
 }
 
-startServer();
+// Start server if run directly
+if (require.main === module) {
+    setupApp().then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    }).catch(err => {
+        console.error('Failed to start server:', err);
+        process.exit(1);
+    });
+}
+
+module.exports = { app, setupApp };

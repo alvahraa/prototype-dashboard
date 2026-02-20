@@ -4,11 +4,8 @@
  */
 
 const API_CONFIG = {
-    // Use relative URL when served by the same backend (production)
-    // Falls back to localhost for standalone dev
-    baseUrl: window.location.port === '3001' || window.location.pathname.startsWith('/absensi')
-        ? '/api'
-        : 'http://localhost:3001/api',
+    // Vercel /api proxy
+    baseUrl: '/api',
     useMockData: false // Set to true for testing without backend
 };
 

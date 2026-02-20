@@ -1,0 +1,9 @@
+node_modules
+backend/node_modules
+.git
+.env
+.env.development
+.env.production
+build
+coverage
+.DS_Store

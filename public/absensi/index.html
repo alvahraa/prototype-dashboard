@@ -355,25 +355,24 @@
 
                     <!-- Locker Selection -->
                     <div class="pt-2 border-t border-[rgba(148,163,184,0.08)]">
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="useLocker" onchange="toggleLockerInput()" class="peer sr-only">
-                            <div
-                                class="w-5 h-5 rounded border border-slate-600 peer-checked:bg-indigo-500 peer-checked:border-indigo-500 flex items-center justify-center transition-colors peer-checked:[&>svg]:opacity-100">
-                                <svg class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                        d="M5 13l4 4L19 7" />
+                        <button type="button" id="lockerToggleBtn" onclick="toggleLockerInput()"
+                            class="w-full flex items-center justify-between px-4 py-3 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl text-sm text-slate-400 hover:text-slate-300 hover:border-[rgba(148,163,184,0.2)] transition-all duration-200">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                 </svg>
-                            </div>
-                            <span
-                                class="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">Pinjam
-                                Kunci Loker?</span>
-                        </label>
+                                Pinjam Kunci Loker?
+                            </span>
+                            <span id="lockerToggleIcon" class="text-xs px-2 py-0.5 bg-slate-700 rounded-md">Tidak</span>
+                        </button>
+                        <input type="hidden" id="useLocker" value="false">
 
-                        <div id="lockerInputContainer" class="hidden mt-3 animate-fade-in">
-                            <label class="text-xs font-medium text-slate-500 mb-1 block">Nomor Loker</label>
+                        <div id="lockerInputContainer" class="hidden mt-3">
+                            <label class="text-xs font-medium text-slate-500 mb-1 block">Nomor Loker (1-163)</label>
                             <input type="number" id="locker_number" name="locker_number"
-                                placeholder="Masukkan nomor loker (1-163)" min="1" max="163"
+                                placeholder="Masukkan nomor loker" min="1" max="163"
                                 class="w-full px-4 py-3 bg-[#0d1017] border border-[rgba(148,163,184,0.12)] rounded-xl text-slate-100 text-sm placeholder:text-slate-500 focus:outline-none input-focus transition-all duration-200">
                         </div>
                     </div>

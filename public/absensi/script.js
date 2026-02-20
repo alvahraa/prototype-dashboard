@@ -45,19 +45,35 @@ document.addEventListener('DOMContentLoaded', () => {
 // No global selectRoom needed anymore, we use checkbox native behavior
 
 function toggleLockerInput() {
-    const checkbox = document.getElementById('useLocker');
+    const hiddenInput = document.getElementById('useLocker');
     const container = document.getElementById('lockerInputContainer');
-    const input = document.getElementById('locker_number');
+    const lockerNum = document.getElementById('locker_number');
+    const toggleIcon = document.getElementById('lockerToggleIcon');
+    const btn = document.getElementById('lockerToggleBtn');
 
-    if (checkbox.checked) {
+    const isActive = hiddenInput.value === 'true';
+
+    if (!isActive) {
+        // Turn ON
+        hiddenInput.value = 'true';
         container.classList.remove('hidden');
-        input.required = true;
+        lockerNum.required = true;
+        toggleIcon.textContent = 'Ya';
+        toggleIcon.className = 'text-xs px-2 py-0.5 bg-amber-600 rounded-md text-white';
+        btn.classList.add('border-amber-500/40');
+        lockerNum.focus();
     } else {
+        // Turn OFF
+        hiddenInput.value = 'false';
         container.classList.add('hidden');
-        input.required = false;
-        input.value = '';
+        lockerNum.required = false;
+        lockerNum.value = '';
+        toggleIcon.textContent = 'Tidak';
+        toggleIcon.className = 'text-xs px-2 py-0.5 bg-slate-700 rounded-md';
+        btn.classList.remove('border-amber-500/40');
     }
 }
+
 
 async function handleSubmit(event) {
     event.preventDefault();
@@ -88,7 +104,7 @@ async function handleSubmit(event) {
         prodi: form.jurusan.value,
         gender: form.gender.value,
         umur: form.umur.value,
-        locker_number: document.getElementById('useLocker').checked ? document.getElementById('locker_number').value : null,
+        locker_number: document.getElementById('useLocker').value === 'true' ? document.getElementById('locker_number').value : null,
         visitTime: new Date().toISOString()
     };
 

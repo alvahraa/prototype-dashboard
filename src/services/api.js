@@ -14,7 +14,7 @@ const config = {
 
   // Backend API (our SQLite backend for attendance)
   backendApi: {
-    baseUrl: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001/api',
+    baseUrl: process.env.REACT_APP_BACKEND_URL || (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3001/api'),
   },
 
   // Gate System API (kunjungan)

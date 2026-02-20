@@ -9,7 +9,9 @@ import logoWhite from '../assets/logo-white.png';
  * Clean, modern design matching dashboard aesthetics
  */
 
-const API_BASE = 'http://localhost:3001/api';
+import { config } from '../services/api';
+
+const API_BASE = config.backendApi.baseUrl;
 
 function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('');

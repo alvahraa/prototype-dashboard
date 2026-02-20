@@ -12,7 +12,9 @@ import { getOperatingHours } from '../../services/settingsService';
  * - Date card
  */
 
-const API_BASE = 'http://localhost:3001/api';
+import { config } from '../../services/api';
+
+const API_BASE = config.backendApi.baseUrl;
 
 const ROOM_NAMES = {
     audiovisual: 'Audiovisual',

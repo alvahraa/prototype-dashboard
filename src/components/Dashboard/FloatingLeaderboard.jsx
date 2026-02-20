@@ -11,7 +11,9 @@ import { Trophy, ChevronDown, ChevronUp, X, Flame } from 'lucide-react';
  * - Animated transitions
  */
 
-const API_BASE = 'http://localhost:3001/api';
+import { config } from '../../services/api';
+
+const API_BASE = config.backendApi.baseUrl;
 
 // Room display names
 const ROOM_NAMES = {

@@ -12,7 +12,9 @@ import {
  * Professional admin management interface
  */
 
-const API_BASE = 'http://localhost:3001/api';
+import { config } from '../services/api';
+
+const API_BASE = config.backendApi.baseUrl;
 
 const containerVariants = {
     hidden: { opacity: 0 },

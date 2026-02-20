@@ -12,25 +12,9 @@ const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // CORS Configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',')
-    : [
-        'http://localhost:3000', 'http://localhost:3002', 'http://localhost:3005', 'http://localhost:3006',
-        'http://127.0.0.1:3000', 'http://127.0.0.1:3002', 'http://127.0.0.1:3005', 'http://127.0.0.1:3006',
-        'http://192.168.1.5:3000', 'http://192.168.1.5:3002', 'http://192.168.1.5:3005', 'http://192.168.1.5:3006'
-    ];
-
-// Middleware
+// In production (Vercel), frontend & backend share same domain, allow all origins
 app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1 || NODE_ENV === 'development') {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
@@ -74,8 +58,9 @@ async function setupApp() {
         const buildPath = path.join(__dirname, '..', 'build');
         app.use(express.static(buildPath));
 
-        // Only serve index.html for non-API routes
-        app.get('*', (req, res) => {
+        // Fallback: serve index.html for non-API routes (React Router)
+        // Use app.use() instead of app.get('*') for path-to-regexp compatibility
+        app.use((req, res, next) => {
             if (req.path.startsWith('/api')) {
                 return res.status(404).json({ error: 'API endpoint not found' });
             }

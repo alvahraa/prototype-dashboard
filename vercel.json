@@ -5,7 +5,15 @@
             "destination": "/api/index.js"
         },
         {
-            "source": "/(.*)",
+            "source": "/absensi",
+            "destination": "/absensi/index.html"
+        },
+        {
+            "source": "/absensi/(.*)",
+            "destination": "/absensi/$1"
+        },
+        {
+            "source": "/((?!api|absensi|.*\\..*).*)",
             "destination": "/index.html"
         }
     ]

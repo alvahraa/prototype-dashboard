@@ -46,9 +46,10 @@ const LockerPage = () => {
     const [selectedLocker, setSelectedLocker] = useState(null);
     const [returningLocker, setReturningLocker] = useState(false);
 
-    // Default Date Range (Last 30 days, same as BICornerPage)
+    // Default Date Range (Last 30 days)
     const [dateRange, setDateRange] = useState(() => {
         const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 1); // +1 day buffer for timezone differences
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - 30);
         return {
@@ -57,10 +58,13 @@ const LockerPage = () => {
         };
     });
 
-    // Fetch Data based on Date Range
+    // Fetch Data based on Date Range (use UTC to avoid timezone issues)
     const fetchData = useCallback(() => {
-        const start = format(new Date(dateRange.startDate), 'yyyy-MM-dd 00:00:00');
-        const end = format(new Date(dateRange.endDate), 'yyyy-MM-dd 23:59:59');
+        const startDt = new Date(dateRange.startDate);
+        const endDt = new Date(dateRange.endDate);
+        // Use UTC date components to match PostgreSQL's TIMESTAMP WITH TIME ZONE
+        const start = `${startDt.getUTCFullYear()}-${String(startDt.getUTCMonth() + 1).padStart(2, '0')}-${String(startDt.getUTCDate()).padStart(2, '0')} 00:00:00`;
+        const end = `${endDt.getUTCFullYear()}-${String(endDt.getUTCMonth() + 1).padStart(2, '0')}-${String(endDt.getUTCDate()).padStart(2, '0')} 23:59:59`;
         return visitorService.getVisitors({
             startDate: start,
             endDate: end

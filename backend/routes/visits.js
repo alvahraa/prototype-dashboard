@@ -304,18 +304,17 @@ router.get('/stats', async (req, res) => {
 router.put('/return-locker-by-number', async (req, res) => {
     try {
         const { locker_number } = req.body;
+        console.log('Return locker request:', { locker_number });
         if (!locker_number) {
             return res.status(400).json({ success: false, error: 'Nomor loker harus diisi' });
         }
 
-        // Find the latest active visit for this locker today
-        // Postgres: CURRENT_DATE
+        // Find active visit for this locker (no date restriction - timezone safe)
         const findResult = await query(`
             SELECT id, nama, nim, prodi, locker_number, visit_time, locker_returned_at 
             FROM visits 
             WHERE locker_number = $1 
               AND locker_returned_at IS NULL 
-              AND DATE(visit_time) = CURRENT_DATE
             ORDER BY visit_time DESC 
             LIMIT 1
         `, [String(locker_number)]);
@@ -323,17 +322,20 @@ router.put('/return-locker-by-number', async (req, res) => {
         if (findResult.rowCount === 0) {
             return res.status(404).json({
                 success: false,
-                error: `Tidak ditemukan peminjaman aktif untuk Loker #${locker_number} hari ini`
+                error: `Tidak ditemukan peminjaman aktif untuk Loker #${locker_number}`
             });
         }
 
         const visit = findResult.rows[0];
 
-        // Mark as returned
-        await query(
-            `UPDATE visits SET locker_returned_at = CURRENT_TIMESTAMP WHERE id = $1`,
-            [visit.id]
+        // Mark ALL unreturned visits with this locker number as returned
+        // (handles case where student visited multiple rooms with same locker key)
+        const updateResult = await query(
+            `UPDATE visits SET locker_returned_at = CURRENT_TIMESTAMP 
+             WHERE locker_number = $1 AND locker_returned_at IS NULL`,
+            [String(locker_number)]
         );
+        console.log(`Returned locker #${locker_number}: ${updateResult.rowCount} records updated`);
 
         res.json({
             success: true,
@@ -349,7 +351,7 @@ router.put('/return-locker-by-number', async (req, res) => {
 
     } catch (error) {
         console.error('Error returning locker by number:', error);
-        res.status(500).json({ success: false, error: 'Internal server error' });
+        res.status(500).json({ success: false, error: error.message || 'Internal server error' });
     }
 });
 
@@ -359,6 +361,7 @@ router.put('/return-locker-by-number', async (req, res) => {
 router.put('/:id/return-locker', async (req, res) => {
     try {
         const visitId = parseInt(req.params.id);
+        console.log('Admin return locker, visit ID:', visitId);
         if (isNaN(visitId)) {
             return res.status(400).json({ success: false, error: 'Invalid visit ID' });
         }
@@ -383,11 +386,14 @@ router.put('/:id/return-locker', async (req, res) => {
             return res.status(400).json({ success: false, error: 'Locker already returned' });
         }
 
-        // Mark as returned
-        await query(
-            `UPDATE visits SET locker_returned_at = CURRENT_TIMESTAMP WHERE id = $1`,
-            [visitId]
+        // Mark ALL unreturned visits with this locker number as returned
+        // (handles case where student visited multiple rooms with same locker key)
+        const updateResult = await query(
+            `UPDATE visits SET locker_returned_at = CURRENT_TIMESTAMP 
+             WHERE locker_number = $1 AND locker_returned_at IS NULL`,
+            [row.locker_number]
         );
+        console.log(`Admin returned locker #${row.locker_number}: ${updateResult.rowCount} records updated`);
 
         res.json({
             success: true,
@@ -396,7 +402,7 @@ router.put('/:id/return-locker', async (req, res) => {
 
     } catch (error) {
         console.error('Error returning locker:', error);
-        res.status(500).json({ success: false, error: 'Internal server error' });
+        res.status(500).json({ success: false, error: error.message || 'Internal server error' });
     }
 });
 

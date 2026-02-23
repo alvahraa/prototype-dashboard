@@ -100,6 +100,9 @@ router.post('/', async (req, res) => {
             });
         }
 
+        // Parse umur safely (form may send empty string)
+        const parsedUmur = umur && umur !== '' ? parseInt(umur) : null;
+
         const pool = getDb();
         const client = await pool.connect();
 
@@ -113,7 +116,7 @@ router.post('/', async (req, res) => {
 
             for (const room of roomsToInsert) {
                 await client.query(queryText, [
-                    nama, nim, prodi, faculty, gender, room, umur || null, locker_number || null
+                    nama, nim, prodi, faculty, gender, room, parsedUmur, locker_number || null
                 ]);
             }
 
@@ -141,7 +144,8 @@ router.post('/', async (req, res) => {
         console.error('Error creating visit:', error);
         res.status(500).json({
             success: false,
-            error: 'Internal server error'
+            error: error.message || 'Internal server error',
+            detail: process.env.NODE_ENV !== 'production' ? error.stack : undefined
         });
     }
 });

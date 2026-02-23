@@ -113,7 +113,7 @@ async function handleSubmit(event) {
         showSuccess(formData);
     } catch (error) {
         console.error('Error:', error);
-        alert('Gagal mengirim. Silakan coba lagi.');
+        alert('Gagal mengirim: ' + error.message);
     } finally {
         submitBtn.disabled = false;
         btnText.textContent = 'Kirim Absensi';

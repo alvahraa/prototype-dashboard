@@ -25,7 +25,7 @@ async function initDatabase() {
 
         // Test connection
         await pool.query('SELECT NOW()');
-        console.log('✓ Connected to Supabase');
+        console.log('✓ Connected to Neon PostgreSQL');
 
         // Create tables
         await pool.query(`
@@ -50,6 +50,15 @@ async function initDatabase() {
         await pool.query(`CREATE INDEX IF NOT EXISTS idx_visits_visit_time ON visits(visit_time)`);
         await pool.query(`CREATE INDEX IF NOT EXISTS idx_visits_nim ON visits(nim)`);
         await pool.query(`CREATE INDEX IF NOT EXISTS idx_visits_room_time ON visits(ruangan, visit_time)`);
+
+        // Ensure columns exist (ALTER TABLE is safe if column already exists)
+        // This fixes cases where table was created by an older version of the code
+        await pool.query(`ALTER TABLE visits ADD COLUMN IF NOT EXISTS locker_number TEXT`);
+        await pool.query(`ALTER TABLE visits ADD COLUMN IF NOT EXISTS locker_returned_at TIMESTAMP WITH TIME ZONE DEFAULT NULL`);
+        await pool.query(`ALTER TABLE visits ADD COLUMN IF NOT EXISTS umur INTEGER`);
+        await pool.query(`ALTER TABLE visits ADD COLUMN IF NOT EXISTS faculty TEXT`);
+        await pool.query(`ALTER TABLE visits ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP`);
+        console.log('✓ Ensured all columns exist');
 
         await pool.query(`
             CREATE TABLE IF NOT EXISTS admins (

@@ -119,12 +119,16 @@ router.post('/', async (req, res) => {
             const queryText = `
                 INSERT INTO visits (nama, nim, prodi, faculty, gender, ruangan, umur, locker_number, visit_time)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP)
+                RETURNING *
             `;
 
+            let lastInserted = null;
             for (const room of roomsToInsert) {
-                await client.query(queryText, [
+                const insertResult = await client.query(queryText, [
                     nama, nim, prodi, faculty, gender, room, parsedUmur, parsedLocker
                 ]);
+                lastInserted = insertResult.rows[0];
+                console.log('Inserted row:', JSON.stringify(lastInserted));
             }
 
             await client.query('COMMIT');
@@ -132,13 +136,7 @@ router.post('/', async (req, res) => {
             res.status(201).json({
                 success: true,
                 message: 'Attendance recorded successfully',
-                data: {
-                    nama,
-                    nim,
-                    rooms: roomsToInsert,
-                    locker: parsedLocker,
-                    umur: parsedUmur
-                }
+                data: lastInserted
             });
 
         } catch (insertError) {

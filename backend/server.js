@@ -48,6 +48,28 @@ async function setupApp() {
     app.use('/api/auth', authRouter);
     app.use('/api/settings', settingsRouter);
 
+    // Debug endpoint - user can visit this directly in browser to test
+    app.get('/api/debug-locker', async (req, res) => {
+        try {
+            const { query } = require('./database');
+            const result = await query('SELECT id, nama, locker_number, locker_returned_at, visit_time FROM visits ORDER BY id DESC LIMIT 10');
+            res.json({
+                status: 'ok',
+                dbConnected: true,
+                message: 'Buka URL ini di browser untuk cek apakah API berjalan',
+                totalRows: result.rowCount,
+                data: result.rows
+            });
+        } catch (e) {
+            res.json({
+                status: 'error',
+                dbConnected: false,
+                error: e.message,
+                stack: e.stack
+            });
+        }
+    });
+
     // Serve static files from React app in production (AFTER API routes)
     // Serve Form Absensi (Static & Explicit Route)
     const absensiPath = path.join(__dirname, '../public/absensi');

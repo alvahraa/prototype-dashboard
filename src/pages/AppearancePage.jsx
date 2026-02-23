@@ -168,8 +168,8 @@ const AppearancePage = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         className={`p-4 rounded-xl flex items-center justify-center gap-3 \${
                             notification.type === 'success' 
-                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
-                                : 'bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20'
+                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-400 dark:border-emerald-800' 
+                                : 'bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-900/40 dark:text-rose-400 dark:border-rose-800'
                         }`}
                     >
                         {notification.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}

@@ -5,7 +5,7 @@ import './index.css';
 import './index.css';
 import { Sidebar, Header } from './components/Layout';
 import logoWhite from './assets/logo-unisula.jpeg';
-import { DashboardPage, VisitorsPage, AudiovisualPage, ReferensiPage, SirkulasiPage, KarelPage, SmartLabPage, BICornerPage, RecommendationsPage, LoginPage, ConsolePage, HistoricalDataPage, LockerPage, AdminPage, OperatingHoursPage } from './pages';
+import { DashboardPage, VisitorsPage, AudiovisualPage, ReferensiPage, SirkulasiPage, KarelPage, SmartLabPage, BICornerPage, RecommendationsPage, LoginPage, ConsolePage, HistoricalDataPage, LockerPage, AdminPage, OperatingHoursPage, AppearancePage } from './pages';
 
 
 import { NotificationProvider } from './context/NotificationContext';
@@ -37,7 +37,8 @@ const PAGE_TITLES = {
   historical: 'Riwayat & Metadata',
   locker: 'Monitoring Loker',
   admin: 'Manajemen Admin',
-  'operating-hours': 'Jam Operasional'
+  'operating-hours': 'Jam Operasional',
+  appearance: 'Pengaturan Tampilan'
 };
 
 // Storage key for auth
@@ -222,6 +223,7 @@ function App() {
       locker: <LockerPage />,
       admin: <AdminPage />,
       'operating-hours': <OperatingHoursPage />,
+      appearance: <AppearancePage />,
     };
     return pages[activePage] || <DashboardPage />;
   };

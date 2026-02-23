@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, User, Bell, Sun, Moon } from 'lucide-react';
 import { format } from 'date-fns';
 import { CommandPalette, NotificationDropdown } from '../Common';
+import { fetchBackendApi } from '../../services/api';
 
 /**
  * Header Component
@@ -29,7 +30,14 @@ const pageTitles = {
 };
 
 function Header({ activePage, onNavigate, user, isDarkMode, onToggleTheme }) {
+  const [profilePic, setProfilePic] = useState(null);
   const today = new Date();
+
+  useEffect(() => {
+    fetchBackendApi('/settings/admin_profile_pic').then(res => {
+      if (res.data) setProfilePic(res.data);
+    }).catch(console.error);
+  }, []);
 
   return (
     <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-6 transition-colors">
@@ -62,8 +70,12 @@ function Header({ activePage, onNavigate, user, isDarkMode, onToggleTheme }) {
 
         {/* User Profile */}
         <button className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors">
-          <div className="w-8 h-8 bg-gray-900 dark:bg-indigo-600 rounded-lg flex items-center justify-center">
-            <User className="w-4 h-4 text-slate-100" />
+          <div className="w-8 h-8 bg-gray-900 dark:bg-indigo-600 rounded-lg flex items-center justify-center overflow-hidden">
+            {profilePic ? (
+              <img src={profilePic} alt="Admin" className="w-full h-full object-cover" />
+            ) : (
+              <User className="w-4 h-4 text-slate-100" />
+            )}
           </div>
           <span className="hidden md:inline text-sm font-medium text-gray-700 dark:text-slate-300">
             {user?.username || 'Admin'}

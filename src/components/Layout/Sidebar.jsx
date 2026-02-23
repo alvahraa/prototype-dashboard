@@ -14,10 +14,12 @@ import {
   Layers,
   Lock,
   LogOut,
-  Clock
+  Clock,
+  Palette
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import logoWhite from '../../assets/logo-unisula.jpeg';
+import { fetchBackendApi } from '../../services/api';
 
 /**
  * Sidebar Navigation Component - Grouped & Collapsible
@@ -57,6 +59,7 @@ const menuGroups = [
     title: 'System',
     items: [
       { id: 'operating-hours', label: 'Jam Operasional', icon: Clock },
+      { id: 'appearance', label: 'Tampilan', icon: Palette },
       { id: 'admin', label: 'Admin', icon: Layers },
     ]
   }
@@ -86,6 +89,13 @@ const itemVariants = {
 
 function Sidebar({ activePage, onNavigate, collapsed, onToggle, onLogout, user }) {
   const [expandedGroups, setExpandedGroups] = useState({ rooms_group: true });
+  const [appLogo, setAppLogo] = useState(logoWhite);
+
+  React.useEffect(() => {
+    fetchBackendApi('/settings/app_logo_dashboard').then(res => {
+      if (res.data) setAppLogo(res.data);
+    }).catch(console.error);
+  }, []);
 
   const toggleGroup = (groupId) => {
     setExpandedGroups(prev => ({
@@ -119,7 +129,7 @@ function Sidebar({ activePage, onNavigate, collapsed, onToggle, onLogout, user }
       <div className="p-5 border-b border-gray-200 dark:border-dark-border-accent flex items-center justify-between h-20">
         <div className={cn("flex items-center gap-3 overflow-hidden w-full", collapsed ? "justify-center" : "")}>
           <img
-            src={logoWhite}
+            src={appLogo}
             alt="Logo Perpustakaan"
             className={cn("object-contain transition-all duration-300", collapsed ? "h-8 w-8" : "h-12 w-auto")}
           />

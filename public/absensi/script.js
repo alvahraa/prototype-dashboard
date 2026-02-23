@@ -38,6 +38,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
     }
 
+    // Fetch Custom Logo from Backend
+    fetch(`${API_CONFIG.baseUrl}/settings/app_logo_absensi`)
+        .then(res => res.json())
+        .then(response => {
+            if (response.success && response.data) {
+                const logoImg = document.getElementById('formLogo');
+                if (logoImg) logoImg.src = response.data;
+            }
+        })
+        .catch(err => console.error('Failed to fetch custom logo:', err));
+
     document.getElementById('absensiForm').addEventListener('submit', handleSubmit);
     setupValidation();
 });

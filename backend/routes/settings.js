@@ -85,4 +85,47 @@ router.put('/operating-hours', async (req, res) => {
     }
 });
 
+/**
+ * GET /:key
+ * Returns a specific setting by key (e.g., app_logo_dashboard, admin_profile_pic)
+ */
+router.get('/:key', async (req, res) => {
+    try {
+        const result = await query("SELECT value FROM settings WHERE key = $1", [req.params.key]);
+        if (result.rowCount > 0) {
+            res.json({ success: true, data: result.rows[0].value });
+        } else {
+            res.json({ success: true, data: null });
+        }
+    } catch (error) {
+        console.error(`Error fetching setting ${req.params.key}:`, error);
+        res.status(500).json({ success: false, error: 'Failed to fetch setting' });
+    }
+});
+
+/**
+ * PUT /:key
+ * Updates a specific setting by key
+ * Body: { value: '...' }
+ */
+router.put('/:key', async (req, res) => {
+    try {
+        const { value } = req.body;
+        if (value === undefined) {
+            return res.status(400).json({ success: false, error: 'Missing value data' });
+        }
+
+        await query(
+            `INSERT INTO settings (key, value) VALUES ($1, $2)
+             ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = CURRENT_TIMESTAMP`,
+            [req.params.key, String(value)]
+        );
+
+        res.json({ success: true, message: 'Settings updated successfully' });
+    } catch (error) {
+        console.error(`Error updating setting ${req.params.key}:`, error);
+        res.status(500).json({ success: false, error: 'Failed to update setting' });
+    }
+});
+
 module.exports = router;

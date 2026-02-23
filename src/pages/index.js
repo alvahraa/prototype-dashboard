@@ -13,4 +13,5 @@ export { default as HistoricalDataPage } from './HistoricalDataPage';
 export { default as AdminPage } from './AdminPage';
 export { default as LockerPage } from './LockerPage';
 export { default as OperatingHoursPage } from './OperatingHoursPage';
+export { default as AppearancePage } from './AppearancePage';
 

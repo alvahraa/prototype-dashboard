@@ -106,17 +106,26 @@ async function handleSubmit(event) {
     btnText.textContent = 'Mengirim...';
     btnLoader.classList.remove('hidden');
 
+    // Read locker number directly from input (simpler, more reliable)
+    const lockerInput = document.getElementById('locker_number');
+    const lockerValue = lockerInput && lockerInput.value && lockerInput.value.trim() !== ''
+        ? lockerInput.value.trim()
+        : null;
+
     // Map form fields to API fields
     const formData = {
-        ruangan: checkedRooms, // Now an array
+        ruangan: checkedRooms,
         nim: form.nim.value,
         nama: form.nama.value,
         prodi: form.jurusan.value,
         gender: form.gender.value,
         umur: form.umur.value,
-        locker_number: document.getElementById('useLocker').value === 'true' ? document.getElementById('locker_number').value : null,
+        locker_number: lockerValue,
         visitTime: new Date().toISOString()
     };
+
+    // Debug: log what we're sending
+    console.log('Sending form data:', JSON.stringify(formData));
 
     try {
         await submitAbsensi(formData);

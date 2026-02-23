@@ -103,6 +103,13 @@ router.post('/', async (req, res) => {
         // Parse umur safely (form may send empty string)
         const parsedUmur = umur && umur !== '' ? parseInt(umur) : null;
 
+        // Parse locker_number safely
+        const parsedLocker = locker_number && locker_number !== '' && locker_number !== 'null'
+            ? String(locker_number)
+            : null;
+
+        console.log('Visit data received:', { nama, nim, prodi, gender, ruangan: roomsToInsert, umur: parsedUmur, locker_number: parsedLocker });
+
         const pool = getDb();
         const client = await pool.connect();
 
@@ -116,7 +123,7 @@ router.post('/', async (req, res) => {
 
             for (const room of roomsToInsert) {
                 await client.query(queryText, [
-                    nama, nim, prodi, faculty, gender, room, parsedUmur, locker_number || null
+                    nama, nim, prodi, faculty, gender, room, parsedUmur, parsedLocker
                 ]);
             }
 
@@ -129,7 +136,8 @@ router.post('/', async (req, res) => {
                     nama,
                     nim,
                     rooms: roomsToInsert,
-                    locker: locker_number
+                    locker: parsedLocker,
+                    umur: parsedUmur
                 }
             });
 

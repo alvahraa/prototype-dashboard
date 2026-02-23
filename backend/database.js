@@ -1,6 +1,6 @@
 /**
  * Database configuration for Perpustakaan UNISSULA
- * Uses PostgreSQL (Supabase) via 'pg' library
+ * Uses PostgreSQL (Neon) via 'pg' library
  */
 
 const { Pool } = require('pg');
@@ -9,11 +9,11 @@ const { Pool } = require('pg');
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false // Required for Supabase/Heroku secure connections
+        rejectUnauthorized: false // Required for Neon/cloud PostgreSQL connections
     },
-    max: 20, // Max clients in the pool
+    max: 10, // Neon free tier supports limited connections
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 5000,
 });
 
 // Helper to run queries

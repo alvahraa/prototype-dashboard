@@ -44,6 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // No global selectRoom needed anymore, we use checkbox native behavior
 
+// Setup form validation (NIM numeric-only, etc.)
+function setupValidation() {
+    const nimInput = document.getElementById('nim');
+    if (nimInput) {
+        nimInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+    }
+}
+
 function toggleLockerInput() {
     const hiddenInput = document.getElementById('useLocker');
     const container = document.getElementById('lockerInputContainer');

@@ -93,7 +93,8 @@ function Sidebar({ activePage, onNavigate, collapsed, onToggle, onLogout, user }
 
   React.useEffect(() => {
     fetchBackendApi('/settings/app_logo_dashboard').then(res => {
-      if (res.data) setAppLogo(res.data);
+      // Only set if we actually got a logo string back
+      if (res.data && res.data.length > 50) setAppLogo(res.data);
     }).catch(console.error);
   }, []);
 

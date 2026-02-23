@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Image as ImageIcon, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Upload, Image as ImageIcon, CheckCircle2, AlertCircle, User, Info } from 'lucide-react';
 import { MotionPage } from '../components/Common';
 import { fetchBackendApi } from '../services/api';
+import logoWhite from '../assets/logo-unisula.jpeg';
 
 const AppearancePage = () => {
     const [settings, setSettings] = useState({
@@ -32,7 +33,7 @@ const AppearancePage = () => {
 
             for (const key of keys) {
                 const { data } = await fetchBackendApi(`/settings/${key}`);
-                if (data) {
+                if (data && data.length > 50) {
                     newSettings[key] = data;
                 }
             }
@@ -85,24 +86,36 @@ const AppearancePage = () => {
         saveSetting(key, '');
     };
 
-    const ImageUploadCard = ({ title, description, storageKey, preview }) => (
-        <div className="bg-white dark:bg-[#1e293b] p-6 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm flex flex-col h-full">
-            <div className="mb-4">
-                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title}</h3>
-                <p className="text-sm text-slate-500">{description}</p>
-            </div>
+    const ImageUploadCard = ({ title, description, storageKey, customValue, defaultPreview }) => {
+        const hasCustom = !!customValue;
+        const displayPreview = customValue || defaultPreview;
+        const isNode = typeof displayPreview !== 'string';
 
-            <div className="flex-1 flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl relative overflow-hidden group">
-                {preview ? (
-                    <div className="relative w-full h-full flex items-center justify-center">
-                        <img
-                            src={preview}
-                            alt={title}
-                            className="max-h-32 object-contain rounded-lg shadow-sm"
-                        />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-lg backdrop-blur-sm">
-                            <label className="p-2 bg-indigo-500 text-white rounded-lg cursor-pointer hover:bg-indigo-600 transition-colors">
-                                <Upload size={18} />
+        return (
+            <div className="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-md">
+                <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title}</h3>
+                    <p className="text-sm text-slate-500 mt-1">{description}</p>
+                </div>
+
+                <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50/50 dark:bg-slate-900/30 relative group">
+                    <div className="relative w-full h-40 flex items-center justify-center rounded-xl p-4 transition-all duration-300">
+                        {isNode ? (
+                            <div className="w-24 h-24 rounded-2xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center shadow-inner">
+                                {displayPreview}
+                            </div>
+                        ) : (
+                            <img
+                                src={displayPreview}
+                                alt={title}
+                                className={`max-h-full max-w-full object-contain drop-shadow-sm ${hasCustom ? 'rounded-lg' : 'opacity-80 grayscale-[20%]'}`}
+                            />
+                        )}
+
+                        <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3 backdrop-blur-[2px] rounded-xl">
+                            <label className="px-4 py-2 bg-white text-slate-900 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors shadow-lg font-medium text-sm flex items-center gap-2">
+                                <Upload size={16} />
+                                {hasCustom ? 'Ubah' : 'Upload'}
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -110,31 +123,23 @@ const AppearancePage = () => {
                                     onChange={(e) => handleFileChange(e, storageKey)}
                                 />
                             </label>
-                            <button
-                                onClick={() => removeImage(storageKey)}
-                                className="p-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
-                            >
-                                Hapus
-                            </button>
+                            {hasCustom && (
+                                <button
+                                    onClick={() => removeImage(storageKey)}
+                                    className="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-lg font-medium text-sm"
+                                >
+                                    Reset
+                                </button>
+                            )}
                         </div>
                     </div>
-                ) : (
-                    <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer text-slate-400 hover:text-indigo-500 transition-colors">
-                        <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <ImageIcon size={32} />
-                        </div>
-                        <span className="text-sm font-medium">Klik untuk upload (Max 2MB)</span>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => handleFileChange(e, storageKey)}
-                        />
-                    </label>
-                )}
+                </div>
+
+                {/* Status Indicator Bar */}
+                <div className={`h-1 w-full ${hasCustom ? 'bg-indigo-500' : 'bg-slate-200 dark:bg-slate-700'}`} />
             </div>
-        </div>
-    );
+        );
+    };
 
     if (loading) return (
         <MotionPage>
@@ -146,22 +151,25 @@ const AppearancePage = () => {
 
     return (
         <MotionPage>
-            <div className="space-y-6">
-                <div className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+            <div className="space-y-6 max-w-6xl mx-auto">
+                <div className="flex items-center justify-between bg-white dark:bg-[#1e293b] p-6 lg:p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">Pengaturan Tampilan</h1>
-                        <p className="text-slate-500 text-sm">Sesuaikan logo instansi dan foto profil administrator</p>
+                        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Pengaturan Tampilan</h1>
+                        <p className="text-slate-500 text-sm max-w-xl">Sesuaikan logo instansi, branding dashboard, dan foto profil administrator. Gambar disimpan dalam basis data dengan batas ukuran 2MB.</p>
+                    </div>
+                    <div className="hidden lg:flex w-16 h-16 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl items-center justify-center text-indigo-500">
+                        <ImageIcon size={28} />
                     </div>
                 </div>
 
                 {notification && (
                     <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`p-4 rounded-xl flex items-center gap-3 \${
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className={`p-4 rounded-xl flex items-center justify-center gap-3 \${
                             notification.type === 'success' 
-                                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20' 
-                                : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20'
+                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
+                                : 'bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20'
                         }`}
                     >
                         {notification.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
@@ -171,34 +179,34 @@ const AppearancePage = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <ImageUploadCard
-                        title="Logo Dashboard"
-                        description="Muncul di pojok kiri atas aplikasi dashboard admin."
+                        title="Logo Aplikasi Dashboard"
+                        description="Ditampilkan pada sidebar di antarmuka administrator."
                         storageKey="app_logo_dashboard"
-                        preview={settings.app_logo_dashboard}
+                        customValue={settings.app_logo_dashboard}
+                        defaultPreview={logoWhite}
                     />
                     <ImageUploadCard
                         title="Foto Profil Admin"
-                        description="Mewakili identitas administrator di header dashboard."
+                        description="Mewakili identitas Anda pada bagian kanan atas header."
                         storageKey="admin_profile_pic"
-                        preview={settings.admin_profile_pic}
+                        customValue={settings.admin_profile_pic}
+                        defaultPreview={<User size={40} className="text-slate-400" />}
                     />
                     <ImageUploadCard
-                        title="Logo Form Absensi"
-                        description="Muncul di halaman form absensi pengunjung perpustakaan."
+                        title="Logo Portal Absensi"
+                        description="Ditampilkan secara publik pada halaman depan form absensi."
                         storageKey="app_logo_absensi"
-                        preview={settings.app_logo_absensi}
+                        customValue={settings.app_logo_absensi}
+                        defaultPreview="/absensi/logo-unisula.jpeg"
                     />
                 </div>
 
-                <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-6 flex gap-4">
-                    <div className="p-2 bg-amber-100 dark:bg-amber-500/20 rounded-lg h-fit text-amber-600 dark:text-amber-400">
-                        <AlertCircle size={20} />
-                    </div>
+                <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 flex gap-4 items-start">
+                    <Info className="w-5 h-5 text-slate-400 mt-0.5 shrink-0" />
                     <div>
-                        <h4 className="font-bold text-amber-800 dark:text-amber-500 mb-1">Catatan Sistem</h4>
-                        <p className="text-sm text-amber-700 dark:text-amber-400/80 leading-relaxed">
-                            Gambar disimpan langsung di dalam database (Base64) untuk mengamankan data di sistem serverless (Vercel).
-                            Jaga ukuran file tetap di bawah 2MB untuk memastikan performa yang optimal.
+                        <h4 className="font-medium text-slate-700 dark:text-slate-300 text-sm mb-1">Status Pengaturan Gambar</h4>
+                        <p className="text-sm text-slate-500 leading-relaxed">
+                            Aplikasi menggunakan gambar bawaan sistem (default) jika Anda belum mengunggah gambar kustom. Kotak dialog unggah akan selalu merepresentasikan gambar yang sedang aktif digunakan saat ini. Indikator garis bawah biru ( <span className="inline-block w-4 h-1 bg-indigo-500 align-middle rounded-full mx-1"></span> ) menandakan gambar kustom dari pengguna sedang aktif.
                         </p>
                     </div>
                 </div>

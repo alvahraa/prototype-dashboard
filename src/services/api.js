@@ -34,7 +34,7 @@ const config = {
   refreshInterval: parseInt(process.env.REACT_APP_REFRESH_INTERVAL || '0', 10),
 
   // Request timeout (ms) untuk mencegah loading tidak berhenti saat backend hang
-  requestTimeoutMs: parseInt(process.env.REACT_APP_REQUEST_TIMEOUT_MS || '8000', 10),
+  requestTimeoutMs: parseInt(process.env.REACT_APP_REQUEST_TIMEOUT_MS || '20000', 10),
 };
 
 /**

@@ -1,8 +1,8 @@
 /**
- * Visits API Routes
- * Endpoints for managing library attendance
- * Refactored for PostgreSQL
- */
+* Visits API Routes
+* Endpoints for managing library attendance
+* Refactored for PostgreSQL
+*/
 
 const express = require('express');
 const router = express.Router();
@@ -108,7 +108,8 @@ router.post('/', async (req, res) => {
             ? String(locker_number)
             : null;
 
-        console.log('Visit data received:', { nama, nim, prodi, gender, ruangan: roomsToInsert, umur: parsedUmur, locker_number: parsedLocker });
+        // Anonymized logging — PII (nama, nim) intentionally omitted
+        console.log('Visit recorded:', { ruangan: roomsToInsert, prodi, rowsInserted: roomsToInsert.length });
 
         const pool = getDb();
         const client = await pool.connect();
@@ -128,7 +129,6 @@ router.post('/', async (req, res) => {
                     nama, nim, prodi, faculty, gender, room, parsedUmur, parsedLocker
                 ]);
                 lastInserted = insertResult.rows[0];
-                console.log('Inserted row:', JSON.stringify(lastInserted));
             }
 
             await client.query('COMMIT');
@@ -232,55 +232,26 @@ router.get('/stats', async (req, res) => {
             paramIdx++; // 3
         }
 
-        // Total visits
-        const totalResult = await query(
-            `SELECT COUNT(*) as total FROM visits ${baseWhere}`,
-            baseParams
-        );
-        const totalVisits = parseInt(totalResult.rows[0]?.total || 0);
-
-        // Visits by room
-        const byRoomResult = await query(
-            `SELECT ruangan, COUNT(*) as count FROM visits ${baseWhere} GROUP BY ruangan ORDER BY count DESC`,
-            baseParams
-        );
-
-        // Visits by faculty
-        const byFacultyResult = await query(
-            `SELECT faculty, COUNT(*) as count FROM visits ${baseWhere} GROUP BY faculty ORDER BY count DESC`,
-            baseParams
-        );
-
-        // Visits by gender
-        const byGenderResult = await query(
-            `SELECT gender, COUNT(*) as count FROM visits ${baseWhere} GROUP BY gender`,
-            baseParams
-        );
-
-        // Daily trend (last 7 days)
-        // Note: Re-building params for this specific query
-        let trendSql = `SELECT DATE(visit_time) as date, COUNT(*) as count FROM visits WHERE visit_time >= NOW() - INTERVAL '7 days'`;
-        let trendParams = [];
-        let trendParamIdx = 1;
-
-        if (ruangan) {
-            trendSql += ` AND ruangan = $${trendParamIdx}`;
-            trendParams.push(ruangan);
-        }
-        trendSql += ` GROUP BY DATE(visit_time) ORDER BY date`;
-
-        const dailyTrendResult = await query(trendSql, trendParams);
-
-        // Peak hours
-        const peakHoursResult = await query(
-            `SELECT TO_CHAR(visit_time, 'HH24') as hour, COUNT(*) as count FROM visits ${baseWhere} GROUP BY hour ORDER BY count DESC LIMIT 5`,
-            baseParams
-        );
+        // Run all 5 queries IN PARALLEL — up to 5x faster (Fix #9)
+        const [totalResult, byRoomResult, byFacultyResult, byGenderResult, dailyTrendResult, peakHoursResult] =
+            await Promise.all([
+                query(`SELECT COUNT(*) as total FROM visits ${baseWhere}`, baseParams),
+                query(`SELECT ruangan, COUNT(*) as count FROM visits ${baseWhere} GROUP BY ruangan ORDER BY count DESC`, baseParams),
+                query(`SELECT faculty, COUNT(*) as count FROM visits ${baseWhere} GROUP BY faculty ORDER BY count DESC`, baseParams),
+                query(`SELECT gender, COUNT(*) as count FROM visits ${baseWhere} GROUP BY gender`, baseParams),
+                query(
+                    ruangan
+                        ? `SELECT DATE(visit_time) as date, COUNT(*) as count FROM visits WHERE visit_time >= NOW() - INTERVAL '7 days' AND ruangan = $1 GROUP BY DATE(visit_time) ORDER BY date`
+                        : `SELECT DATE(visit_time) as date, COUNT(*) as count FROM visits WHERE visit_time >= NOW() - INTERVAL '7 days' GROUP BY DATE(visit_time) ORDER BY date`,
+                    ruangan ? [ruangan] : []
+                ),
+                query(`SELECT TO_CHAR(visit_time, 'HH24') as hour, COUNT(*) as count FROM visits ${baseWhere} GROUP BY hour ORDER BY count DESC LIMIT 5`, baseParams),
+            ]);
 
         res.json({
             success: true,
             data: {
-                totalVisits,
+                totalVisits: parseInt(totalResult.rows[0]?.total || 0),
                 byRoom: byRoomResult.rows,
                 byFaculty: byFacultyResult.rows,
                 byGender: byGenderResult.rows,

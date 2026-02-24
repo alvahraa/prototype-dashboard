@@ -11,10 +11,23 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// CORS Configuration
-// In production (Vercel), frontend & backend share same domain, allow all origins
+// CORS Configuration — only allow known origins (defense-in-depth)
+const ALLOWED_ORIGINS = [
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+    'https://perpustakaan-dashboard.vercel.app',
+    process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : null,
+    process.env.NODE_ENV !== 'production' ? 'http://localhost:3001' : null,
+].filter(Boolean);
+
 app.use(cors({
-    origin: true,
+    origin: (origin, callback) => {
+        // Allow server-to-server requests (no origin header) and listed origins
+        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
@@ -48,27 +61,29 @@ async function setupApp() {
     app.use('/api/auth', authRouter);
     app.use('/api/settings', settingsRouter);
 
-    // Debug endpoint - user can visit this directly in browser to test
-    app.get('/api/debug-locker', async (req, res) => {
-        try {
-            const { query } = require('./database');
-            const result = await query('SELECT id, nama, locker_number, locker_returned_at, visit_time FROM visits ORDER BY id DESC LIMIT 10');
-            res.json({
-                status: 'ok',
-                dbConnected: true,
-                message: 'Buka URL ini di browser untuk cek apakah API berjalan',
-                totalRows: result.rowCount,
-                data: result.rows
-            });
-        } catch (e) {
-            res.json({
-                status: 'error',
-                dbConnected: false,
-                error: e.message,
-                stack: e.stack
-            });
-        }
-    });
+    // Debug endpoint — ONLY available in non-production environments
+    if (process.env.NODE_ENV !== 'production') {
+        app.get('/api/debug-locker', async (req, res) => {
+            try {
+                const { query } = require('./database');
+                const result = await query('SELECT id, nama, locker_number, locker_returned_at, visit_time FROM visits ORDER BY id DESC LIMIT 10');
+                res.json({
+                    status: 'ok',
+                    dbConnected: true,
+                    message: 'Buka URL ini di browser untuk cek apakah API berjalan',
+                    totalRows: result.rowCount,
+                    data: result.rows
+                });
+            } catch (e) {
+                res.json({
+                    status: 'error',
+                    dbConnected: false,
+                    error: e.message
+                    // e.stack intentionally omitted — no stack traces in responses
+                });
+            }
+        });
+    }
 
     // Serve static files from React app in production (AFTER API routes)
     // Serve Form Absensi (Static & Explicit Route)

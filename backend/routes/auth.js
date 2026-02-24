@@ -6,8 +6,11 @@
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 const { query } = require('../database');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-dev-secret-change-in-prod';
 
 /**
  * POST /api/auth/login
@@ -45,8 +48,12 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Generate simple token (in production, use JWT)
-        const token = Buffer.from(`${user.id}:${user.username}:${Date.now()}`).toString('base64');
+        // Generate JWT token — cryptographically signed, cannot be forged
+        const token = jwt.sign(
+            { id: user.id, username: user.username },
+            JWT_SECRET,
+            { expiresIn: '8h' }
+        );
 
         res.json({
             success: true,
@@ -207,8 +214,17 @@ router.get('/admins', async (req, res) => {
 /**
  * POST /api/auth/init
  * Initialize default admin if none exists
+ * 
+ * 🔐 SECURITY: Requires x-init-secret header matching INIT_SECRET env var.
+ * This endpoint must NEVER be publicly accessible without authentication.
  */
 router.post('/init', async (req, res) => {
+    // Require a secret token to prevent unauthorized admin reset
+    const initSecret = req.headers['x-init-secret'];
+    if (!initSecret || initSecret !== process.env.INIT_SECRET) {
+        return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+
     try {
         const result = await query('SELECT COUNT(*) as count FROM admins');
         const count = parseInt(result.rows[0].count);
@@ -232,7 +248,8 @@ router.post('/init', async (req, res) => {
 
         res.json({
             success: true,
-            message: 'Default admin created: admin / admin123',
+            // Never include default credentials in API response — check your email/env for setup info
+            message: 'Default admin initialized. Please change the password immediately via the Admin panel.',
             initialized: true
         });
     } catch (error) {

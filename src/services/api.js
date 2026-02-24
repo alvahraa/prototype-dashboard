@@ -108,11 +108,20 @@ async function fetchSlimsApi(endpoint, options = {}) {
 }
 
 /**
- * Fetch dari Backend API (SQLite attendance system)
+ * Fetch dari Backend API (attendance system)
+ * Automatically injects JWT Authorization header when a token is stored in localStorage.
  */
 async function fetchBackendApi(endpoint, options = {}) {
   const url = `${config.backendApi.baseUrl}${endpoint}`;
-  return fetchApi(url, options);
+  const token = localStorage.getItem('authToken');
+  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+  return fetchApi(url, {
+    ...options,
+    headers: {
+      ...authHeaders,
+      ...options.headers,
+    },
+  });
 }
 
 export { config, fetchApi, fetchGateApi, fetchSlimsApi, fetchBackendApi };

@@ -8,6 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const { query } = require('../database');
+const { requireAuth } = require('../middleware/auth');
 
 /**
  * GET /operating-hours
@@ -48,7 +49,7 @@ router.get('/operating-hours', async (req, res) => {
  * Updates the operating hours configuration
  * Body: { senin: { buka: '08:00', tutup: '17:00', aktif: true }, ... }
  */
-router.put('/operating-hours', async (req, res) => {
+router.put('/operating-hours', requireAuth, async (req, res) => {
     try {
         const hours = req.body;
 
@@ -108,7 +109,7 @@ router.get('/:key', async (req, res) => {
  * Updates a specific setting by key
  * Body: { value: '...' }
  */
-router.put('/:key', async (req, res) => {
+router.put('/:key', requireAuth, async (req, res) => {
     try {
         const { value } = req.body;
         if (value === undefined) {

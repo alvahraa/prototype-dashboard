@@ -13,12 +13,10 @@ module.exports = async (req, res) => {
 
         return app(req, res);
     } catch (error) {
-        // Always show full details to help debug on Vercel
-        console.error('Serverless Init Error:', error);
+        // Log full details for Vercel Function logs only — NEVER expose to client
+        console.error('[Cold Start FAILED]', error);
         res.status(500).json({
-            error: 'Failed to initialize server',
-            details: error.message,
-            stack: error.stack
+            error: 'Service temporarily unavailable. Please try again.'
         });
     }
 };

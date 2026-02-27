@@ -11,20 +11,22 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// CORS Configuration — only allow known origins (defense-in-depth)
-const ALLOWED_ORIGINS = [
-    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
-    'https://perpustakaan-dashboard.vercel.app',
-    process.env.NODE_ENV !== 'production' ? 'http://localhost:3000' : null,
-    process.env.NODE_ENV !== 'production' ? 'http://localhost:3001' : null,
-].filter(Boolean);
+// CORS Configuration — allow Vercel deployments (production + previews) and localhost
+function isAllowedOrigin(origin) {
+    if (!origin) return true; // server-to-server (no origin header)
+    // Allow all Vercel preview & production URLs for this project
+    if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return true;
+    // Allow localhost in development
+    if (/^http:\/\/localhost:\d+$/.test(origin)) return true;
+    return false;
+}
 
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow server-to-server requests (no origin header) and listed origins
-        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+        if (isAllowedOrigin(origin)) {
             callback(null, true);
         } else {
+            console.warn('CORS blocked origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },

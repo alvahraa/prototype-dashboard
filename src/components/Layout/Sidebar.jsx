@@ -151,7 +151,7 @@ function Sidebar({ activePage, onNavigate, collapsed, onToggle, onLogout, user }
           <div key={groupIdx}>
             {/* Group Title */}
             {!collapsed && !group.isGroup && group.title && group.items.length > 0 && (
-              <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 px-3">
+              <h4 className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-1 px-3">
                 {group.title}
               </h4>
             )}
@@ -162,7 +162,10 @@ function Sidebar({ activePage, onNavigate, collapsed, onToggle, onLogout, user }
                 <li>
                   {/* Group Header */}
                   <button
-                    onClick={() => collapsed ? null : toggleGroup(group.id)}
+                    onClick={() => {
+                      if (collapsed) onToggle();
+                      toggleGroup(group.id);
+                    }}
                     className={cn(
                       "w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
                       collapsed ? "justify-center" : "justify-between hover:bg-gray-100 dark:hover:bg-dark-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
@@ -227,11 +230,11 @@ function Sidebar({ activePage, onNavigate, collapsed, onToggle, onLogout, user }
                       <button
                         onClick={() => onNavigate(item.id)}
                         className={cn(
-                          "relative w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
-                          collapsed ? "justify-center" : "",
+                          "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
+                          collapsed ? "justify-center py-3 my-1" : "",
                           isActive
-                            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-800"
+                            ? "bg-indigo-50 text-indigo-600 font-medium dark:bg-indigo-600/10 dark:text-indigo-400"
+                            : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-800/50"
                         )}
                         title={item.label}
                       >

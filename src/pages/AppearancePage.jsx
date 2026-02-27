@@ -92,28 +92,31 @@ const AppearancePage = () => {
         const isNode = typeof displayPreview !== 'string';
 
         return (
-            <div className="bg-white dark:bg-[#1e293b] rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-md">
-                <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">{title}</h3>
-                    <p className="text-sm text-slate-500 mt-1">{description}</p>
+            <div className="bg-white dark:bg-transparent rounded-2xl border border-slate-100 dark:border-slate-800 flex flex-col h-full overflow-hidden transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700">
+                <div className="p-5">
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">{title}</h3>
+                        {hasCustom && <span className="flex w-2 h-2 rounded-full bg-indigo-500 ring-2 ring-indigo-50 dark:ring-indigo-900/30" title="Kustom Aktif" />}
+                    </div>
+                    <p className="text-sm text-slate-500 leading-relaxed">{description}</p>
                 </div>
 
-                <div className="flex-1 flex flex-col items-center justify-center p-8 bg-slate-50/50 dark:bg-slate-900/30 relative group">
-                    <div className="relative w-full h-40 flex items-center justify-center rounded-xl p-4 transition-all duration-300">
+                <div className="flex-1 flex flex-col items-center justify-center px-5 pb-5 relative group">
+                    <div className="relative w-full h-36 flex items-center justify-center overflow-hidden rounded-xl bg-slate-50 dark:bg-slate-900/50 transition-all duration-300 border border-slate-100 dark:border-slate-800/60 group-hover:bg-slate-100/50 dark:group-hover:bg-slate-800/80">
                         {isNode ? (
-                            <div className="w-24 h-24 rounded-2xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center shadow-inner">
+                            <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
                                 {displayPreview}
                             </div>
                         ) : (
                             <img
                                 src={displayPreview}
                                 alt={title}
-                                className={`max-h-full max-w-full object-contain drop-shadow-sm ${hasCustom ? 'rounded-lg' : 'opacity-80 grayscale-[20%]'}`}
+                                className={`max-h-[85%] max-w-[85%] object-contain ${hasCustom ? 'rounded-lg drop-shadow-sm' : 'opacity-60 grayscale-[40%]'}`}
                             />
                         )}
 
-                        <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3 backdrop-blur-[2px] rounded-xl">
-                            <label className="px-4 py-2 bg-white text-slate-900 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors shadow-lg font-medium text-sm flex items-center gap-2">
+                        <div className="absolute inset-0 bg-slate-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-2 backdrop-blur-[1px] rounded-xl dark:bg-slate-900/40">
+                            <label className="px-5 py-2 bg-white text-slate-900 rounded-lg cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 transition-colors shadow-sm border border-slate-200 font-medium text-sm flex items-center gap-2">
                                 <Upload size={16} />
                                 {hasCustom ? 'Ubah' : 'Upload'}
                                 <input
@@ -126,7 +129,7 @@ const AppearancePage = () => {
                             {hasCustom && (
                                 <button
                                     onClick={() => removeImage(storageKey)}
-                                    className="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-lg font-medium text-sm"
+                                    className="px-5 py-2 bg-transparent text-rose-500 rounded-lg hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10 transition-colors font-medium text-sm"
                                 >
                                     Reset
                                 </button>
@@ -134,9 +137,6 @@ const AppearancePage = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Status Indicator Bar */}
-                <div className={`h-1 w-full ${hasCustom ? 'bg-indigo-500' : 'bg-slate-200 dark:bg-slate-700'}`} />
             </div>
         );
     };
@@ -206,7 +206,7 @@ const AppearancePage = () => {
                     <div>
                         <h4 className="font-medium text-slate-700 dark:text-slate-300 text-sm mb-1">Status Pengaturan Gambar</h4>
                         <p className="text-sm text-slate-500 leading-relaxed">
-                            Aplikasi menggunakan gambar bawaan sistem (default) jika Anda belum mengunggah gambar kustom. Kotak dialog unggah akan selalu merepresentasikan gambar yang sedang aktif digunakan saat ini. Indikator garis bawah biru ( <span className="inline-block w-4 h-1 bg-indigo-500 align-middle rounded-full mx-1"></span> ) menandakan gambar kustom dari pengguna sedang aktif.
+                            Aplikasi menggunakan gambar bawaan sistem (default) jika Anda belum mengunggah gambar kustom. Kotak dialog unggah akan selalu merepresentasikan gambar yang sedang aktif digunakan saat ini. Titik indikator biru ( <span className="inline-block w-2 h-2 bg-indigo-500 ring-2 ring-indigo-50 dark:ring-indigo-900/30 align-middle rounded-full mx-1"></span> ) menandakan gambar kustom dari pengguna sedang aktif.
                         </p>
                     </div>
                 </div>

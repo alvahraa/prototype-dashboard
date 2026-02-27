@@ -31,7 +31,28 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '10mb' }));
+
+// Vercel serverless pre-parses the request body. When Express tries to
+// parse it again via express.json(), the stream is already consumed and
+// req.body ends up empty/undefined. This middleware restores it.
+app.use((req, res, next) => {
+    if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+        return next(); // Already parsed correctly by express.json()
+    }
+    // On Vercel, the raw body may have been pre-parsed and attached differently
+    // Check if Vercel has pre-parsed body in a different location
+    if (req.rawBody || req.body === undefined) {
+        try {
+            if (typeof req.rawBody === 'string') {
+                req.body = JSON.parse(req.rawBody);
+            }
+        } catch (e) {
+            // Not JSON, proceed anyway
+        }
+    }
+    next();
+});
 
 // Request logging
 app.use((req, res, next) => {

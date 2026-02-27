@@ -111,6 +111,12 @@ router.get('/:key', async (req, res) => {
  */
 router.put('/:key', requireAuth, async (req, res) => {
     try {
+        // Guard against empty/missing body (e.g. body parsing failed on Vercel)
+        if (!req.body || typeof req.body !== 'object') {
+            console.error(`PUT /settings/${req.params.key} - req.body is empty or not an object:`, typeof req.body);
+            return res.status(400).json({ success: false, error: 'Request body is empty or malformed' });
+        }
+
         const { value } = req.body;
         if (value === undefined) {
             return res.status(400).json({ success: false, error: 'Missing value data' });
@@ -124,7 +130,7 @@ router.put('/:key', requireAuth, async (req, res) => {
 
         res.json({ success: true, message: 'Settings updated successfully' });
     } catch (error) {
-        console.error(`Error updating setting ${req.params.key}:`, error);
+        console.error(`Error updating setting ${req.params.key}:`, error.message, error.stack);
         res.status(500).json({ success: false, error: 'Failed to update setting' });
     }
 });

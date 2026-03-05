@@ -1,598 +1,401 @@
-# Prototype Dashboard - Library Analytics System
+# Dashboard Analytics - Perpustakaan UNISSULA
 
 <div align="center">
 
 ![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![Recharts](https://img.shields.io/badge/Recharts-2.x-FF6384?style=for-the-badge&logo=chart.js&logoColor=white)
 
-**Sistem dashboard analytics modern untuk monitoring perpustakaan dengan visualisasi data real-time.**
-
-[Tujuan](#tujuan-project) | [Fitur](#fitur-utama) | [Mekanisme](#mekanisme-dan-logic) | [Instalasi](#instalasi)
+**Sistem dashboard analytics untuk monitoring data kunjungan, peminjaman buku, dan operasional Perpustakaan UNISSULA.**
 
 </div>
 
 ---
 
-> **CATATAN PENTING:**  
-> Sistem ini masih berupa **PROTOTYPE** dan menggunakan **data dummy** untuk demonstrasi.  
-> Belum diuji coba dengan database real (Gate System / SLiMS).  
-> Diperlukan integrasi dan pengujian lebih lanjut sebelum digunakan di lingkungan produksi.
+## Daftar Isi
 
----
-
-## Tujuan Project
-
-### Latar Belakang
-
-Perpustakaan modern membutuhkan sistem monitoring yang dapat memberikan insight real-time tentang:
-- Pola kunjungan mahasiswa dan dosen
-- Tren peminjaman buku
-- Efisiensi operasional perpustakaan
-- Data-driven decision making untuk pengadaan buku dan jam operasional
-
-### Tujuan Utama
-
-1. **Visualisasi Data Real-Time**
-   - Menampilkan data kunjungan dan peminjaman dalam bentuk grafik yang mudah dipahami
-   - Memberikan overview cepat melalui KPI cards
-
-2. **Analisis Pola Kunjungan**
-   - Mengidentifikasi jam sibuk perpustakaan (peak hours)
-   - Memahami distribusi pengunjung berdasarkan fakultas
-   - Tracking durasi kunjungan
-
-3. **Monitoring Peminjaman**
-   - Mengetahui buku-buku paling populer
-   - Analisis keterlambatan pengembalian
-   - Trend peminjaman bulanan
-
-4. **Prototype untuk Integrasi**
-   - Sebagai proof-of-concept sebelum integrasi dengan Gate System dan SLiMS
-   - Template untuk pengembangan dashboard perpustakaan lainnya
+- [Fitur Utama](#fitur-utama)
+- [Tech Stack](#tech-stack)
+- [Prasyarat](#prasyarat)
+- [Instalasi](#instalasi)
+- [Konfigurasi Environment](#konfigurasi-environment)
+- [Menjalankan Aplikasi](#menjalankan-aplikasi)
+- [Deploy ke Server (Production)](#deploy-ke-server-production)
+- [Struktur Folder](#struktur-folder)
+- [Akun Default](#akun-default)
+- [Lisensi](#lisensi)
 
 ---
 
 ## Fitur Utama
 
-### 1. Dashboard Overview
-
-Halaman utama menampilkan ringkasan data perpustakaan:
-
-| Komponen | Fungsi |
-|----------|--------|
-| KPI Cards | 4 metrik utama dengan animated counting |
-| Trend Chart | Line chart kunjungan 7 hari terakhir |
-| Category Chart | Bar chart peminjaman per kategori |
-| Top Books | 5 buku terpopuler bulan ini |
-
-### 2. Analisis Kunjungan
-
-Halaman dengan fokus pada data pengunjung:
-
-| Tab | Konten |
-|-----|--------|
-| Overview | Stats cards dan Peak Hours heatmap |
-| Visitor Logs | Tabel pengunjung dengan search dan filter |
-| Demographics | Pie chart distribusi per fakultas |
-
-### 3. Analisis Peminjaman
-
-Halaman dengan fokus pada data peminjaman:
-
-| Tab | Konten |
-|-----|--------|
-| Analytics | Keterlambatan stats, trend chart, category chart |
-| Top Books | Grid 10 buku terpopuler dengan visual cards |
-| Loan History | Tabel riwayat peminjaman dengan export |
-
-### 4. Dark Mode Professional
-
-Sistem theming dengan dua mode:
-- **Light Mode**: Clean dan professional untuk penggunaan siang hari
-- **Dark Mode**: Premium dark aesthetic untuk kenyamanan mata
-
-Fitur dark mode:
-- Persistent di localStorage
-- Sinkronisasi dengan preferensi sistem
-- Typography hierarchy untuk menghindari eye strain
-
-### 5. Command Palette
-
-Keyboard shortcut `Ctrl + K` untuk akses cepat:
-- Navigasi ke semua halaman
-- Toggle dark mode
-- Use system theme
-
-### 6. System Console (Stealth Mode)
-
-Console tersembunyi untuk administrasi sistem, diakses dengan `Ctrl + Shift + X`:
-- Query data langsung
-- Run diagnostics
-- System status monitoring
-
----
-
-## Mekanisme dan Logic
-
-### 1. Arsitektur Sistem Lengkap
-
-Diagram berikut menunjukkan alur data dari source systems (SLiMS dan Gate System) sampai ke visualisasi dashboard:
-
-```
-+------------------+     +------------------+
-|   GATE SYSTEM    |     |     SLiMS        |
-| (MySQL Database) |     | (MySQL Database) |
-+--------+---------+     +--------+---------+
-         |                        |
-         | visitor_log            | biblio, loan, member
-         |                        |
-         +----------+  +----------+
-                    |  |
-                    v  v
-         +---------------------+
-         |    REST API Layer   |
-         | (Node.js / Laravel) |
-         +----------+----------+
-                    |
-                    | JSON Response
-                    v
-+-----------------------------------------------+
-|            REACT FRONTEND                     |
-|                                               |
-|  +----------------+    +------------------+   |
-|  | Service Layer  |    | Data Generator   |   |
-|  | (api.js)       |    | (Dummy Mode)     |   |
-|  +-------+--------+    +--------+---------+   |
-|          |                      |             |
-|          +----------+-----------+             |
-|                     |                         |
-|                     v                         |
-|          +-------------------+                |
-|          |   React Hooks     |                |
-|          | useVisitors()     |                |
-|          | useLoans()        |                |
-|          | useBooks()        |                |
-|          +--------+----------+                |
-|                   |                           |
-|                   v                           |
-|          +-------------------+                |
-|          | Analytics Layer   |                |
-|          | analytics.js      |                |
-|          | - getPeakHours()  |                |
-|          | - getTopBooks()   |                |
-|          | - getTrend()      |                |
-|          +--------+----------+                |
-|                   |                           |
-|                   v                           |
-|          +-------------------+                |
-|          | UI Components     |                |
-|          | - Recharts        |                |
-|          | - Framer Motion   |                |
-|          | - Tailwind CSS    |                |
-|          +-------------------+                |
-+-----------------------------------------------+
-```
-
-### 2. Detail Alur Data
-
-#### A. Dari Gate System ke Dashboard
-
-```
-Gate System Database (MySQL)
-    |
-    | Table: visitor_log
-    | Fields: id, nim, name, faculty, entry_time, exit_time
-    |
-    v
-REST API Endpoint
-    |
-    | GET /api/visitors?start=2026-01-01&end=2026-01-11
-    | Response: JSON array of visitor objects
-    |
-    v
-visitorService.js
-    |
-    | getVisitors(dateRange)
-    | - Fetch dari API
-    | - Handle errors
-    | - Transform data
-    |
-    v
-useVisitors() Hook
-    |
-    | - State management
-    | - Loading state
-    | - Auto-refresh interval
-    |
-    v
-Analytics Functions
-    |
-    | calculatePeakHours(visitors)
-    | --> Output: [{hour: "08:00", visits: 45, isPeak: true}]
-    |
-    | getFacultyDistribution(visitors)
-    | --> Output: [{name: "Teknik", count: 234, percentage: 28.5}]
-    |
-    | calculateAverageDuration(visitors)
-    | --> Output: {average: 95, formattedAverage: "1 jam 35 menit"}
-    |
-    v
-UI Components
-    |
-    | PeakHoursHeatmap.jsx --> Bar chart jam sibuk
-    | FacultyPieChart.jsx --> Pie chart distribusi fakultas
-    | VisitorTable.jsx --> Tabel data dengan search/filter
-```
-
-#### B. Dari SLiMS ke Dashboard
-
-```
-SLiMS Database (MySQL)
-    |
-    | Table: biblio (buku)
-    | Fields: biblio_id, title, author, publisher, isbn
-    |
-    | Table: loan (peminjaman)
-    | Fields: loan_id, item_code, member_id, loan_date, due_date, return_date
-    |
-    | Table: member (anggota)
-    | Fields: member_id, member_name, member_type_id
-    |
-    v
-REST API Endpoints
-    |
-    | GET /api/books --> Daftar buku
-    | GET /api/loans?start=...&end=... --> Data peminjaman
-    |
-    v
-loanService.js + bookService.js
-    |
-    | getLoans(dateRange)
-    | getBooks()
-    |
-    v
-useLoans() + useBooks() Hooks
-    |
-    v
-Analytics Functions
-    |
-    | getTopBooks(loans, books, 10)
-    | --> Output: [{title: "Clean Code", totalLoans: 45}]
-    |
-    | getCategoryPopularity(loans, books)
-    | --> Output: [{category: "Teknologi", count: 234, percentage: 35}]
-    |
-    | analyzeLateReturns(loans)
-    | --> Output: {lateRate: 12.5, avgLateDays: 3.2, totalLate: 45}
-    |
-    | getLoanTrend(loans, 6)
-    | --> Output: [{month: "Jan", count: 234}]
-    |
-    v
-UI Components
-    |
-    | TopBooksGrid.jsx --> Grid visual buku populer
-    | CategoryBarChart.jsx --> Horizontal bar chart kategori
-    | LateReturnStats.jsx --> Stats cards keterlambatan
-    | LoanTrendChart.jsx --> Area chart trend bulanan
-```
-
-### 3. Mode Operasi
-
-Dashboard mendukung dua mode operasi:
-
-| Mode | Sumber Data | Penggunaan |
-|------|-------------|------------|
-| **Dummy** | `generateDummyData.js` | Development dan demo |
-| **Production** | Gate System API + SLiMS API | Live environment |
-
-**Switch mode** dilakukan di `src/services/api.js`:
-
-```javascript
-// Mode: 'dummy' atau 'production'
-const MODE = process.env.REACT_APP_DATA_MODE || 'dummy';
-
-export async function fetchData(endpoint) {
-  if (MODE === 'dummy') {
-    return generateDummyData(endpoint);
-  }
-  return fetch(`${API_BASE_URL}${endpoint}`).then(res => res.json());
-}
-```
-
-### 2. Visitor Trend Analysis
-
-**Lokasi**: `src/utils/analytics.js` - `getVisitorTrend()`
-
-**Logic**:
-```javascript
-// Input: Array visitor data, jumlah hari
-// Process:
-//   1. Filter visitors berdasarkan rentang tanggal
-//   2. Group by tanggal menggunakan reduce()
-//   3. Count jumlah visitor per hari
-//   4. Sort berdasarkan tanggal ascending
-// Output: Array [{date, count, dayName}]
-```
-
-**Kegunaan**: Menampilkan trend kunjungan untuk identifikasi pola harian dan prediksi traffic.
-
-### 3. Peak Hours Detection
-
-**Lokasi**: `src/utils/analytics.js` - `calculatePeakHours()`
-
-**Logic**:
-```javascript
-// Input: Array visitor data
-// Process:
-//   1. Extract jam masuk (entryTime) dari setiap visitor
-//   2. Group by jam (7, 8, 9, ..., 21)
-//   3. Count jumlah visitor per jam
-//   4. Calculate persentase relatif terhadap jam tersibuk
-//   5. Mark jam dengan visits > 80% dari max sebagai "peak"
-// Output: Array [{hour, visits, isPeak, percentage}]
-```
-
-**Kegunaan**: Mengidentifikasi jam sibuk untuk optimasi staffing dan resource allocation.
-
-### 4. Faculty Distribution
-
-**Lokasi**: `src/utils/analytics.js` - `getFacultyDistribution()`
-
-**Logic**:
-```javascript
-// Input: Array visitor data
-// Process:
-//   1. Group visitors by fakultas
-//   2. Count per fakultas
-//   3. Calculate persentase dari total
-//   4. Sort descending by count
-// Output: Array [{name, count, percentage}]
-```
-
-**Kegunaan**: Memahami segmentasi pengunjung untuk targeting program literasi.
-
-### 5. Top Books Algorithm
-
-**Lokasi**: `src/utils/analytics.js` - `getTopBooks()`
-
-**Logic**:
-```javascript
-// Input: Array loans, Array books, limit
-// Process:
-//   1. Count peminjaman per bookId menggunakan reduce()
-//   2. Join dengan data buku untuk mendapat title, author, category
-//   3. Sort descending by totalLoans
-//   4. Slice untuk mendapat top N buku
-// Output: Array [{id, title, author, category, totalLoans}]
-```
-
-**Kegunaan**: Mengetahui buku populer untuk pengadaan dan penempatan display.
-
-### 6. Late Returns Analysis
-
-**Lokasi**: `src/utils/analytics.js` - `analyzeLateReturns()`
-
-**Logic**:
-```javascript
-// Input: Array loans
-// Process:
-//   1. Filter loans yang sudah dikembalikan
-//   2. Hitung selisih returnDate - dueDate
-//   3. Jika selisih > 0, tandai sebagai late
-//   4. Calculate lateRate = (totalLate / totalReturned) * 100
-//   5. Calculate avgLateDays = sum(lateDays) / totalLate
-// Output: {lateRate, avgLateDays, totalLate, totalReturned}
-```
-
-**Kegunaan**: Monitoring tingkat keterlambatan untuk policy adjustment.
-
-### 7. Category Popularity
-
-**Lokasi**: `src/utils/analytics.js` - `getCategoryPopularity()`
-
-**Logic**:
-```javascript
-// Input: Array loans, Array books
-// Process:
-//   1. Join loans dengan books berdasarkan bookId
-//   2. Group by kategori buku
-//   3. Count peminjaman per kategori
-//   4. Calculate persentase dari total
-//   5. Sort descending by count
-// Output: Array [{category, count, percentage}]
-```
-
-**Kegunaan**: Insight untuk pengadaan buku berdasarkan demand.
-
-### 8. Duration Tracking
-
-**Lokasi**: `src/utils/analytics.js` - `calculateAverageDuration()`
-
-**Logic**:
-```javascript
-// Input: Array visitor data
-// Process:
-//   1. Filter visitors yang sudah exit (memiliki exitTime)
-//   2. Calculate duration = exitTime - entryTime (dalam menit)
-//   3. Calculate average dan median
-//   4. Format ke string (contoh: "1 jam 30 menit")
-// Output: {average, median, formattedAverage, formattedMedian}
-```
-
-**Kegunaan**: Mengukur engagement pengunjung di perpustakaan.
-
----
-
-## Data Filtering System
-
-### Date Range Filter
-
-Semua halaman mendukung filter berdasarkan rentang tanggal:
-
-```javascript
-const filtered = data.filter(item => {
-  const itemDate = new Date(item.timestamp);
-  return itemDate >= startDate && itemDate <= endDate;
-});
-```
-
-### Search Filter
-
-Visitor table mendukung pencarian teks:
-
-```javascript
-const searched = visitors.filter(v => 
-  v.name.toLowerCase().includes(query) ||
-  v.nim.includes(query) ||
-  v.faculty.toLowerCase().includes(query)
-);
-```
+| Fitur | Deskripsi |
+|-------|-----------|
+| **Dashboard Overview** | KPI cards, trend kunjungan, dan statistik ringkas |
+| **Analisis Kunjungan** | Peak hours, distribusi fakultas, log pengunjung |
+| **Analisis Peminjaman** | Trend bulanan, keterlambatan |
+| **Manajemen Loker** | Tracking peminjaman & pengembalian loker |
+| **Jam Operasional** | Konfigurasi jam buka/tutup per hari |
+| **Form Absensi** | Form kunjungan yang bisa diakses publik |
+| **Multi-Ruangan** | Audiovisual, BI Corner, Karel, Referensi, Sirkulasi, SmartLab |
+| **Dark Mode** | Tema gelap profesional dengan sinkronisasi otomatis |
+| **Admin Panel** | Manajemen admin, appearance, dan pengaturan |
+| **Export Excel** | Export data kunjungan dan peminjaman ke Excel |
 
 ---
 
 ## Tech Stack
 
-| Technology | Purpose | Version |
-|------------|---------|---------|
-| React | UI Library dengan Hooks | 18.x |
-| Tailwind CSS | Utility-first Styling | 3.x |
-| Recharts | Data Visualization | 2.x |
-| Framer Motion | Animation Library | Latest |
-| Lucide React | Modern Icons | Latest |
-| date-fns | Date Manipulation | 3.x |
-| xlsx | Excel Export | Latest |
+| Teknologi | Fungsi |
+|-----------|--------|
+| **React 18** | Frontend UI |
+| **Tailwind CSS 3** | Styling |
+| **Recharts** | Visualisasi data & grafik |
+| **Framer Motion** | Animasi & transisi |
+| **Node.js + Express** | Backend API |
+| **PostgreSQL** | Database (via Neon atau lokal) |
+| **PM2** | Process manager untuk production |
+
+---
+
+## Prasyarat
+
+Pastikan sudah terinstall di komputer/server:
+
+| Software | Versi Minimum | Download |
+|----------|---------------|----------|
+| **Node.js** | v18.x atau lebih baru | [nodejs.org](https://nodejs.org/) |
+| **npm** | v9.x (otomatis dengan Node.js) | — |
+| **Git** | Terbaru | [git-scm.com](https://git-scm.com/) |
+| **PostgreSQL** | v15+ (atau gunakan Neon cloud) | [postgresql.org](https://www.postgresql.org/download/) |
 
 ---
 
 ## Instalasi
 
-### Prerequisites
-- Node.js 16+
-- npm atau yarn
-
-### Quick Start
+### 1. Clone Repository
 
 ```bash
-# Clone repository
 git clone https://github.com/alvahraa/prototype-dashboard.git
-
-# Masuk ke direktori
 cd prototype-dashboard
-
-# Install dependencies
-npm install
-
-# Jalankan development server
-npm start
 ```
 
-Buka http://localhost:3000 di browser.
+### 2. Install Dependencies Frontend
+
+```bash
+npm install
+```
+
+### 3. Install Dependencies Backend
+
+```bash
+cd backend
+npm install
+cd ..
+```
+
+### 4. Konfigurasi Environment
+
+Salin file contoh environment:
+
+```bash
+# Untuk backend
+copy .env.example .env
+```
+
+> Di Linux/Mac gunakan `cp .env.example .env`
+
+Edit file `.env` dan isi dengan konfigurasi yang sesuai. Lihat bagian [Konfigurasi Environment](#konfigurasi-environment) untuk detail setiap variabel.
+
+### 5. Setup Database
+
+Jika menggunakan **PostgreSQL lokal**:
+
+```sql
+-- Buat database baru
+CREATE DATABASE perpustakaan_unissula;
+```
+
+Kemudian isi `DATABASE_URL` di file `.env`:
+
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/perpustakaan_unissula
+```
+
+Jika menggunakan **Neon (cloud PostgreSQL)**, dapatkan connection string dari dashboard Neon dan masukkan ke `DATABASE_URL`.
+
+> **Catatan:** Tabel database akan dibuat otomatis saat server pertama kali dijalankan.
 
 ---
 
-## Struktur Project
+## Konfigurasi Environment
+
+Buat file `.env` di root project. Variabel yang dibutuhkan:
+
+```env
+# === DATABASE ===
+# Connection string PostgreSQL
+# Format: postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+DATABASE_URL=postgresql://username:password@localhost:5432/perpustakaan_unissula
+
+# === KEAMANAN ===
+# Secret key untuk JWT authentication (ganti dengan string random yang kuat)
+JWT_SECRET=ganti-dengan-secret-key-yang-kuat-dan-panjang
+
+# === SERVER ===
+# Port untuk backend API (default: 3001)
+PORT=3001
+
+# === FRONTEND (opsional) ===
+# Mode data: 'dummy' untuk demo, 'production' untuk data real
+REACT_APP_DATA_MODE=production
+
+# URL backend API (untuk koneksi frontend ke backend)
+REACT_APP_API_URL=http://localhost:3001
+
+# Interval refresh data dalam milidetik (default: 300000 = 5 menit)
+REACT_APP_REFRESH_INTERVAL=300000
+```
+
+> ⚠️ **PENTING:** Jangan pernah commit file `.env` ke Git. File ini sudah ada di `.gitignore`.
+
+---
+
+## Menjalankan Aplikasi
+
+### Mode Development (untuk testing lokal)
+
+Jalankan **dua terminal** secara bersamaan:
+
+**Terminal 1 — Backend API:**
+```bash
+cd backend
+npm run dev
+```
+Server API akan berjalan di `http://localhost:3001`
+
+**Terminal 2 — Frontend:**
+```bash
+npm start
+```
+Dashboard akan terbuka di `http://localhost:3000`
+
+### Cara Cepat (Windows)
+
+Gunakan script otomatis:
+```bash
+start-all.bat
+```
+
+### Cara Cepat (Linux/Mac)
+
+```bash
+chmod +x start-all.sh
+./start-all.sh
+```
+
+---
+
+## Deploy ke Server (Production)
+
+### Langkah 1: Build Frontend
+
+```bash
+npm run build
+```
+
+Ini akan menghasilkan folder `build/` berisi file statis yang siap di-serve.
+
+### Langkah 2: Konfigurasi Environment Production
+
+Buat file `.env` di server:
+
+```env
+DATABASE_URL=postgresql://user:password@host:5432/perpustakaan_unissula
+JWT_SECRET=secret-key-production-yang-sangat-kuat
+PORT=3001
+NODE_ENV=production
+```
+
+### Langkah 3: Jalankan dengan PM2
+
+Install PM2 secara global:
+```bash
+npm install -g pm2
+```
+
+Jalankan server:
+```bash
+pm2 start ecosystem.config.js --env production
+```
+
+Perintah PM2 yang berguna:
+```bash
+pm2 status              # Lihat status server
+pm2 logs perpustakaan-api  # Lihat log
+pm2 restart perpustakaan-api  # Restart server
+pm2 stop perpustakaan-api     # Stop server
+pm2 save                # Simpan konfigurasi agar auto-start saat reboot
+pm2 startup             # Setup auto-start saat booting
+```
+
+### Langkah 4: Setup Reverse Proxy (Opsional, Rekomendasi)
+
+Jika menggunakan **Nginx** sebagai reverse proxy:
+
+```nginx
+server {
+    listen 80;
+    server_name perpustakaan.unissula.ac.id;
+
+    # Frontend (file statis dari build/)
+    location / {
+        root /path/to/prototype-dashboard/build;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Backend API
+    location /api/ {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Form Absensi
+    location /absensi/ {
+        proxy_pass http://localhost:3001;
+    }
+}
+```
+
+---
+
+## Struktur Folder
 
 ```
 prototype-dashboard/
-├── public/
-│   └── index.html
 │
-├── src/
-│   ├── components/
-│   │   ├── Common/        # Shared components (Tabs, DatePicker, etc.)
-│   │   ├── Dashboard/     # KPICards, TrendChart, CategoryChart
-│   │   ├── Layout/        # Sidebar, Header
-│   │   ├── Loans/         # TopBooksGrid, LoanTrendChart, LateReturnStats
-│   │   └── Visitors/      # PeakHoursHeatmap, FacultyPieChart, VisitorTable
-│   │
-│   ├── data/
-│   │   └── generateDummyData.js  # Data dummy untuk demo
-│   │
-│   ├── hooks/
-│   │   └── useDataFetch.js       # Custom hooks
-│   │
-│   ├── pages/
-│   │   ├── DashboardPage.jsx
-│   │   ├── VisitorsPage.jsx
-│   │   ├── LoansPage.jsx
-│   │   ├── ConsolePage.jsx
-│   │   └── LoginPage.jsx
-│   │
-│   ├── services/
-│   │   ├── api.js
-│   │   ├── visitorService.js
-│   │   ├── loanService.js
-│   │   └── bookService.js
-│   │
-│   ├── utils/
-│   │   ├── analytics.js          # Analytic functions
-│   │   ├── exportToExcel.js      # Excel export utility
-│   │   └── cn.js                 # Class name utility
-│   │
-│   ├── App.js
-│   └── index.css
+├── backend/                  # Backend API (Node.js + Express)
+│   ├── server.js             # Entry point server
+│   ├── database.js           # Koneksi & inisialisasi database
+│   ├── middleware/            # Middleware (auth, dll)
+│   ├── routes/               # API endpoints
+│   │   ├── auth.js           # Login & manajemen admin
+│   │   ├── visits.js         # Data kunjungan & statistik
+│   │   └── settings.js       # Pengaturan aplikasi
+│   └── package.json
 │
-├── tailwind.config.js
-├── package.json
-└── README.md
+├── src/                      # Frontend React
+│   ├── components/           # Komponen UI
+│   │   ├── Common/           # Komponen shared (Tabs, DatePicker, dll)
+│   │   ├── Dashboard/        # KPI Cards, Chart, dll
+│   │   ├── Layout/           # Sidebar, Header
+│   │   ├── Visitors/         # Komponen halaman kunjungan
+│   │   ├── Loans/            # Komponen halaman peminjaman
+│   │   ├── Audiovisual/      # Ruang audiovisual
+│   │   ├── BICorner/         # BI Corner
+│   │   ├── Karel/            # Ruang Karel
+│   │   ├── Referensi/        # Ruang referensi
+│   │   ├── Sirkulasi/        # Sirkulasi
+│   │   └── SmartLab/         # SmartLab
+│   ├── pages/                # Halaman-halaman utama
+│   ├── services/             # Service layer (API calls)
+│   ├── utils/                # Utility functions (analytics, export)
+│   ├── hooks/                # Custom React hooks
+│   ├── context/              # React context (state global)
+│   ├── App.js                # Root component
+│   └── index.css             # Global styles
+│
+├── public/                   # File statis
+│   ├── absensi/              # Form absensi (standalone HTML)
+│   └── images/               # Gambar & aset
+│
+├── api/                      # Vercel serverless entry point
+│   └── index.js
+│
+├── .env.example              # Template konfigurasi environment
+├── ecosystem.config.js       # Konfigurasi PM2 untuk production
+├── start-all.bat             # Script start (Windows)
+├── start-all.sh              # Script start (Linux/Mac)
+├── vercel.json               # Konfigurasi Vercel deployment
+├── tailwind.config.js        # Konfigurasi Tailwind CSS
+├── package.json              # Dependencies frontend
+└── README.md                 # Dokumentasi ini
 ```
 
----
+### File Penting untuk Instalasi
 
-## Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| Ctrl + K | Open Command Palette |
-| Ctrl + Shift + X | Open System Console (Stealth Mode) |
-| Arrow Up/Down | Navigate in Command Palette |
-| Enter | Select in Command Palette |
-| Esc | Close modals |
-
----
-
-## Mode Data
-
-Dashboard mendukung 2 mode:
-
-| Mode | Keterangan |
-|------|------------|
-| dummy | Menggunakan data dummy (1000 visitors, 200 books, 2000 loans) |
-| production | Terhubung ke Gate System dan SLiMS API |
-
-Default mode adalah `dummy` untuk development dan demo.
+| File/Folder | Fungsi | Wajib? |
+|-------------|--------|--------|
+| `.env` | Konfigurasi database, JWT, port | ✅ Ya |
+| `backend/` | Seluruh backend API | ✅ Ya |
+| `src/` | Seluruh source code frontend | ✅ Ya |
+| `public/` | File statis & form absensi | ✅ Ya |
+| `package.json` | Dependencies | ✅ Ya |
+| `build/` | Hasil build (generate sendiri) | ⚠️ Untuk production |
+| `ecosystem.config.js` | PM2 config | ⚠️ Jika pakai PM2 |
+| `vercel.json` | Vercel config | ❌ Hanya untuk Vercel |
 
 ---
 
-## Rencana Pengembangan
+## Akun Default
 
-### Phase 1 (Current)
-- Prototype dengan data dummy
-- Visualisasi dasar
-- Dark mode support
+Saat pertama kali dijalankan, sistem akan otomatis membuat akun admin default:
 
-### Phase 2 (Planned)
-- Integrasi Gate System API
-- Integrasi SLiMS API
-- Real-time data sync
+| Field | Nilai |
+|-------|-------|
+| Username | `admin` |
+| Password | `admin123` |
 
-### Phase 3 (Future)
-- Role-based access control
-- Report generation
-- Email notifications
+> ⚠️ **PENTING:** Segera ubah password default setelah login pertama melalui menu Admin.
 
 ---
 
-## Author
+## Form Absensi
 
-**Alvah Rabbany** - Proyek Magang - Prototype Dashboard Analytics Perpustakaan
+Form kunjungan dapat diakses di:
+```
+http://localhost:3001/absensi
+```
+
+Di production:
+```
+https://domain-anda.com/absensi
+```
+
+Form ini bisa dibuka di tablet atau komputer yang diletakkan di meja resepsionis perpustakaan.
+
+---
+
+## Troubleshooting
+
+| Masalah | Solusi |
+|---------|--------|
+| `npm install` gagal | Pastikan Node.js v18+ terinstall, hapus `node_modules` & `package-lock.json` lalu coba lagi |
+| Database connection error | Periksa `DATABASE_URL` di `.env`, pastikan PostgreSQL aktif |
+| Port sudah dipakai | Ganti `PORT` di `.env` ke port lain (misal: 3002) |
+| Halaman blank setelah build | Pastikan `homepage` di `package.json` sesuai dengan URL deploy |
+| Form absensi tidak muncul | Pastikan backend berjalan dan akses via `/absensi` |
+
+---
+
+## Lisensi
+
+Software ini dilisensikan kepada Perpustakaan UNISSULA dengan **hak penuh** untuk menggunakan, memodifikasi, dan mengembangkan.  
+Lihat file [LICENSE](./LICENSE) untuk detail lengkap.
 
 ---
 
 <div align="center">
 
-**Prototype Dashboard untuk Monitoring Perpustakaan Modern**
+**Dikembangkan oleh Alvah Rabbany**  
+Email: alvahrabbany22@gmail.com | GitHub: [alvahraa](https://github.com/alvahraa)  
+untuk **Perpustakaan Universitas Islam Sultan Agung (UNISSULA)**
+
+(c) 2026 Alvah Rabbany
 
 </div>

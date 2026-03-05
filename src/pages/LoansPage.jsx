@@ -1,14 +1,14 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, BookOpen, History } from 'lucide-react';
-import { TopBooksGrid, CategoryBarChart, LoanTrendChart, LateReturnStats } from '../components/Loans';
-import { 
-  LoadingPage, 
-  ErrorMessage, 
-  RefreshButton, 
-  DateRangePicker, 
+import { CategoryBarChart, LoanTrendChart, LateReturnStats } from '../components/Loans';
+import {
+  LoadingPage,
+  ErrorMessage,
+  RefreshButton,
+  DateRangePicker,
   LastUpdated,
-  Tabs 
+  Tabs
 } from '../components/Common';
 import { useLoans, useBooks } from '../hooks';
 import * as analytics from '../utils/analytics';
@@ -25,7 +25,6 @@ import * as analytics from '../utils/analytics';
 // Tab definitions
 const tabs = [
   { id: 'analytics', label: 'Analytics', icon: TrendingUp },
-  { id: 'books', label: 'Top Books', icon: BookOpen },
   { id: 'history', label: 'Loan History', icon: History },
 ];
 
@@ -39,7 +38,7 @@ const tabContentVariants = {
 function LoansPage() {
   // Active tab state
   const [activeTab, setActiveTab] = useState('analytics');
-  
+
   // Date range state
   const [dateRange, setDateRange] = useState(() => {
     const endDate = new Date();
@@ -77,10 +76,7 @@ function LoansPage() {
     return analytics.getLoanTrend(loans, 6);
   }, [loans]);
 
-  const topBooks = useMemo(() => {
-    if (!loans || !books) return [];
-    return analytics.getTopBooks(loans, books, 10);
-  }, [loans, books]);
+
 
   const categoryPop = useMemo(() => {
     if (!loans || !books) return [];
@@ -96,8 +92,8 @@ function LoansPage() {
 
   if (error && !loans) {
     return (
-      <ErrorMessage 
-        message={error} 
+      <ErrorMessage
+        message={error}
         onRetry={handleRefresh}
         variant="page"
       />
@@ -109,13 +105,13 @@ function LoansPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
-          <DateRangePicker 
+          <DateRangePicker
             value={dateRange}
             onChange={setDateRange}
           />
           {lastUpdated && <LastUpdated timestamp={lastUpdated} />}
         </div>
-        <RefreshButton 
+        <RefreshButton
           onClick={handleRefresh}
           loading={loading}
         />
@@ -123,8 +119,8 @@ function LoansPage() {
 
       {/* Error banner */}
       {error && loans && (
-        <ErrorMessage 
-          message={error} 
+        <ErrorMessage
+          message={error}
           onRetry={handleRefresh}
           variant="card"
         />
@@ -132,12 +128,12 @@ function LoansPage() {
 
       {/* Tab Navigation */}
       <div className="flex items-center justify-between">
-        <Tabs 
+        <Tabs
           tabs={tabs}
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
-        
+
         {/* Quick Stats */}
         <div className="hidden md:flex items-center gap-4 text-sm">
           <div className="text-gray-500 dark:text-slate-400">
@@ -171,7 +167,7 @@ function LoansPage() {
                 <h3 className="card-header">Analisis Keterlambatan</h3>
                 <LateReturnStats lateAnalysis={lateAnalysis} />
               </div>
-              
+
               {/* Charts Row */}
               <div className="bento-grid-2">
                 <LoanTrendChart data={loanTrend} title="Trend Peminjaman 6 Bulan" />
@@ -180,29 +176,7 @@ function LoansPage() {
             </div>
           )}
 
-          {/* Top Books Tab */}
-          {activeTab === 'books' && (
-            <div className="space-y-6">
-              <TopBooksGrid books={topBooks} title="Top 10 Buku Terpopuler" />
-              
-              {/* Category Stats */}
-              <div className="card">
-                <h3 className="card-header">Popularitas per Kategori</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {categoryPop.slice(0, 6).map((cat, index) => (
-                    <div 
-                      key={cat.category} 
-                      className="text-center p-4 bg-gray-50 dark:bg-dark-750 rounded-xl hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
-                    >
-                      <p className="text-2xl font-bold text-gray-900 dark:text-slate-100">{cat.percentage}%</p>
-                      <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 line-clamp-1">{cat.category}</p>
-                      <p className="text-xs text-gray-400 dark:text-slate-500">{cat.count.toLocaleString('id-ID')} pinjam</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+
 
           {/* Loan History Tab */}
           {activeTab === 'history' && (
@@ -214,7 +188,7 @@ function LoansPage() {
                     <span className="chip chip-success">Aktif: {activeLoans}</span>
                     <span className="chip chip-neutral">Selesai: {totalLoans - activeLoans}</span>
                     <span className="chip chip-error">Terlambat: {lateAnalysis.totalLate}</span>
-                    <button 
+                    <button
                       onClick={() => {
                         const { exportToExcel } = require('../utils/exportToExcel');
                         const data = loans?.slice(0, 50).map(l => ({
@@ -228,12 +202,12 @@ function LoansPage() {
                       }}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 rounded-lg transition-colors ml-2"
                     >
-                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M12 11v6"/><path d="m9 14 3 3 3-3"/></svg>
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" /><path d="M12 11v6" /><path d="m9 14 3 3 3-3" /></svg>
                       <span>Export</span>
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Loan Table Placeholder */}
                 <div className="overflow-x-auto">
                   <table className="table">
@@ -269,7 +243,7 @@ function LoansPage() {
                     </tbody>
                   </table>
                 </div>
-                
+
                 <p className="text-sm text-gray-400 dark:text-slate-500 mt-4 text-center">
                   Menampilkan 10 dari {totalLoans.toLocaleString('id-ID')} peminjaman
                 </p>

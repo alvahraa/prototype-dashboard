@@ -5,7 +5,7 @@ import './index.css';
 import './index.css';
 import { Sidebar, Header } from './components/Layout';
 import logoWhite from './assets/logo-unisula.jpeg';
-import { DashboardPage, VisitorsPage, AudiovisualPage, ReferensiPage, SirkulasiPage, KarelPage, SmartLabPage, BICornerPage, RecommendationsPage, LoginPage, ConsolePage, HistoricalDataPage, LockerPage, AdminPage, OperatingHoursPage, AppearancePage } from './pages';
+import { DashboardPage, VisitorsPage, AudiovisualPage, ReferensiPage, SirkulasiPage, KarelPage, SmartLabPage, BICornerPage, LoginPage, ConsolePage, HistoricalDataPage, LockerPage, AdminPage, OperatingHoursPage, AppearancePage } from './pages';
 
 
 import { NotificationProvider } from './context/NotificationContext';
@@ -17,7 +17,7 @@ import { regenerateData } from './data/generateDummyData';
  * Prototype Dashboard Analytics
  * - Login: Halaman login dengan animasi wallpaper
  * - Layout: Sidebar + Header + Content
- * - Navigation: Dashboard, Visitors, Loans, Recommendations
+ * - Navigation: Dashboard, Visitors, Loans
  * - Page transitions with AnimatePresence
  * - Stealth Console: Ctrl+Shift+X to access hidden System Console
  */
@@ -32,7 +32,7 @@ const PAGE_TITLES = {
   karel: 'Ruang Karel',
   smartlab: 'SmartLab',
   bicorner: 'BI Corner',
-  recommendations: 'Sistem Rekomendasi',
+
   console: 'System Console',
   historical: 'Riwayat & Metadata',
   locker: 'Monitoring Loker',
@@ -217,7 +217,7 @@ function App() {
       karel: <KarelPage />,
       smartlab: <SmartLabPage />,
       bicorner: <BICornerPage />,
-      recommendations: <RecommendationsPage />,
+
       console: <ConsolePage />,
       historical: <HistoricalDataPage onBack={() => setActivePage('visitors')} />,
       locker: <LockerPage />,

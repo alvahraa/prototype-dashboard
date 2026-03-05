@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, 
-  LayoutDashboard, 
-  Users, 
-  BookOpen, 
-  Sparkles,
+import {
+  Search,
+  LayoutDashboard,
+  Users,
+  BookOpen,
   Moon,
   Sun,
   X,
@@ -70,7 +69,7 @@ const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: 'dashboard', section: 'Navigation' },
   { id: 'visitors', label: 'Kunjungan', icon: Users, path: 'visitors', section: 'Navigation' },
   { id: 'loans', label: 'Peminjaman', icon: BookOpen, path: 'loans', section: 'Navigation' },
-  { id: 'recommendations', label: 'Rekomendasi', icon: Sparkles, path: 'recommendations', section: 'Navigation' },
+
 ];
 
 // System commands only - no creation actions
@@ -89,15 +88,15 @@ const backdropVariants = {
 
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.95, y: -20 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
+  visible: {
+    opacity: 1,
+    scale: 1,
     y: 0,
     transition: { type: 'spring', stiffness: 300, damping: 30 }
   },
-  exit: { 
-    opacity: 0, 
-    scale: 0.95, 
+  exit: {
+    opacity: 0,
+    scale: 0.95,
     y: -10,
     transition: { duration: 0.15 }
   },
@@ -130,7 +129,7 @@ function CommandPalette({ onNavigate }) {
   }, []);
 
   // Filter items based on search
-  const filteredItems = allItems.filter(item => 
+  const filteredItems = allItems.filter(item =>
     item.label.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -240,11 +239,11 @@ function CommandPalette({ onNavigate }) {
             exit="hidden"
           >
             {/* Backdrop */}
-            <motion.div 
+            <motion.div
               className="absolute inset-0 bg-black/40 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
-            
+
             {/* Modal Content */}
             <motion.div
               className="relative w-full max-w-lg mx-4 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700"
@@ -265,7 +264,7 @@ function CommandPalette({ onNavigate }) {
                   placeholder="Search pages or commands..."
                   className="flex-1 text-base outline-none placeholder:text-gray-400 bg-transparent text-gray-900 dark:text-gray-100"
                 />
-                <button 
+                <button
                   onClick={() => setIsOpen(false)}
                   className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
                 >
@@ -285,16 +284,15 @@ function CommandPalette({ onNavigate }) {
                       const isSelected = globalIndex === selectedIndex;
                       const Icon = getThemeIcon(item);
                       const label = getThemeLabel(item);
-                      
+
                       return (
                         <button
                           key={item.id}
                           onClick={() => handleSelect(item)}
-                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                            isSelected 
-                              ? 'bg-gray-100 dark:bg-gray-800' 
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${isSelected
+                              ? 'bg-gray-100 dark:bg-gray-800'
                               : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                          }`}
+                            }`}
                         >
                           <Icon className={`w-5 h-5 ${isSelected ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400'}`} />
                           <span className={`flex-1 ${isSelected ? 'text-gray-900 dark:text-gray-100 font-medium' : 'text-gray-600 dark:text-gray-300'}`}>

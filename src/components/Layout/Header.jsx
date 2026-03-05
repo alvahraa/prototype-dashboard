@@ -23,7 +23,7 @@ const pageTitles = {
   karel: 'Ruang Karel',
   smartlab: 'SmartLab',
   bicorner: 'BI Corner',
-  recommendations: 'Sistem Rekomendasi',
+
   console: 'System Console',
   historical: 'Riwayat & Metadata',
   admin: 'Manajemen Admin'

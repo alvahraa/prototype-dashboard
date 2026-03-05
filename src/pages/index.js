@@ -6,7 +6,7 @@ export { default as SirkulasiPage } from './SirkulasiPage';
 export { default as KarelPage } from './KarelPage';
 export { default as SmartLabPage } from './SmartLabPage';
 export { default as BICornerPage } from './BICornerPage';
-export { default as RecommendationsPage } from './RecommendationsPage';
+
 export { default as LoginPage } from './LoginPage';
 export { default as ConsolePage } from './ConsolePage';
 export { default as HistoricalDataPage } from './HistoricalDataPage';

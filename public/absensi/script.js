@@ -4,9 +4,14 @@
  */
 
 const API_CONFIG = {
-    // Vercel /api proxy
-    baseUrl: '/api',
-    useMockData: false // Set to true for testing without backend
+    // Ubah URL di bawah ini ke alamat server backend utama Anda jika di-hosting terpisah.
+    // Contoh: 'https://nama-backend-anda.up.railway.app/api' atau 'https://domain-anda.com/api'
+    // Default fallback untuk localhost/development adalah 'http://localhost:3001/api'
+    baseUrl: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3001/api'
+        : 'https://backend-perpus.vercel.app/api', // Ganti dengan URL Production Backend
+
+    useMockData: false // Set to true untuk testing tanpa backend
 };
 
 const ROOM_NAMES = {

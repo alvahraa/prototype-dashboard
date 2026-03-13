@@ -22,5 +22,6 @@
             "source": "/((?!api|absensi|.*\\\\..*).*)",
             "destination": "/index.html"
         }
-    ]
+    ],
+    "buildCommand": "npx cross-env CI=false npm run build"
 }
